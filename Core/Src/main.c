@@ -139,7 +139,7 @@ int main(void)
             avg += avg_tmp[i];
         }
         avg /= 20;
-        printf("cnt:%ld max:%ld min:%ld avg:%ld\r\n", cnt, max, min, avg);
+        logInfo("cnt:%ld max:%ld min:%ld avg:%ld\r\n", cnt, max, min, avg);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
