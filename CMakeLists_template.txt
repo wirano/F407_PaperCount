@@ -48,6 +48,7 @@ endif ()
 include_directories(${includes}
                     Lib/letter-shell/src
                     Lib/letter-shell/extensions/log
+                    Lib/UsartScreen
                     )
 
 add_definitions(${defines})
@@ -55,6 +56,7 @@ add_definitions(${defines})
 file(GLOB_RECURSE SOURCES ${sources}
      "Lib/letter-shell/src/*.c"
      "Lib/letter-shell/extensions/log/*.c"
+     "Lib/UsartScreen/*.c"
     )
 
 set(LINKER_SCRIPT $${CMAKE_SOURCE_DIR}/${linkerScript})

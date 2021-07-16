@@ -1,4 +1,4 @@
-#THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
+#此文件从模板自动生成! 请勿更改!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.19)
@@ -49,6 +49,7 @@ endif ()
 include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include
                     Lib/letter-shell/src
                     Lib/letter-shell/extensions/log
+                    Lib/UsartScreen
                     )
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32F407xx)
@@ -56,6 +57,7 @@ add_definitions(-DUSE_HAL_DRIVER -DSTM32F407xx)
 file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*"
      "Lib/letter-shell/src/*.c"
      "Lib/letter-shell/extensions/log/*.c"
+     "Lib/UsartScreen/*.c"
     )
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407ZGTx_FLASH.ld)
