@@ -58,29 +58,37 @@ static volatile DSTATUS Stat = STA_NOINIT;
 
 /* Private function prototypes -----------------------------------------------*/
 static DSTATUS SD_CheckStatus(BYTE lun);
-DSTATUS SD_initialize (BYTE);
-DSTATUS SD_status (BYTE);
-DRESULT SD_read (BYTE, BYTE*, DWORD, UINT);
+
+DSTATUS SD_initialize(BYTE);
+
+DSTATUS SD_status(BYTE);
+
+DRESULT SD_read(BYTE, BYTE *, DWORD, UINT);
+
 #if _USE_WRITE == 1
-DRESULT SD_write (BYTE, const BYTE*, DWORD, UINT);
+
+DRESULT SD_write(BYTE, const BYTE *, DWORD, UINT);
+
 #endif /* _USE_WRITE == 1 */
 #if _USE_IOCTL == 1
-DRESULT SD_ioctl (BYTE, BYTE, void*);
+
+DRESULT SD_ioctl(BYTE, BYTE, void *);
+
 #endif  /* _USE_IOCTL == 1 */
 
-const Diskio_drvTypeDef  SD_Driver =
-{
-  SD_initialize,
-  SD_status,
-  SD_read,
+const Diskio_drvTypeDef SD_Driver =
+        {
+                SD_initialize,
+                SD_status,
+                SD_read,
 #if  _USE_WRITE == 1
-  SD_write,
+                SD_write,
 #endif /* _USE_WRITE == 1 */
 
 #if  _USE_IOCTL == 1
-  SD_ioctl,
+                SD_ioctl,
 #endif /* _USE_IOCTL == 1 */
-};
+        };
 
 /* USER CODE BEGIN beforeFunctionSection */
 /* can be used to modify / undefine following code or add new code */
@@ -90,14 +98,13 @@ const Diskio_drvTypeDef  SD_Driver =
 
 static DSTATUS SD_CheckStatus(BYTE lun)
 {
-  Stat = STA_NOINIT;
+    Stat = STA_NOINIT;
 
-  if(BSP_SD_GetCardState() == MSD_OK)
-  {
-    Stat &= ~STA_NOINIT;
-  }
+    if (BSP_SD_GetCardState() == MSD_OK) {
+        Stat &= ~STA_NOINIT;
+    }
 
-  return Stat;
+    return Stat;
 }
 
 /**
@@ -107,20 +114,19 @@ static DSTATUS SD_CheckStatus(BYTE lun)
   */
 DSTATUS SD_initialize(BYTE lun)
 {
-Stat = STA_NOINIT;
+    Stat = STA_NOINIT;
 
 #if !defined(DISABLE_SD_INIT)
 
-  if(BSP_SD_Init() == MSD_OK)
-  {
-    Stat = SD_CheckStatus(lun);
-  }
+    if (BSP_SD_Init() == MSD_OK) {
+        Stat = SD_CheckStatus(lun);
+    }
 
 #else
-  Stat = SD_CheckStatus(lun);
+    Stat = SD_CheckStatus(lun);
 #endif
 
-  return Stat;
+    return Stat;
 }
 
 /**
@@ -130,7 +136,7 @@ Stat = STA_NOINIT;
   */
 DSTATUS SD_status(BYTE lun)
 {
-  return SD_CheckStatus(lun);
+    return SD_CheckStatus(lun);
 }
 
 /* USER CODE BEGIN beforeReadSection */
@@ -147,20 +153,18 @@ DSTATUS SD_status(BYTE lun)
 
 DRESULT SD_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 {
-  DRESULT res = RES_ERROR;
+    DRESULT res = RES_ERROR;
 
-  if(BSP_SD_ReadBlocks((uint32_t*)buff,
-                       (uint32_t) (sector),
-                       count, SD_TIMEOUT) == MSD_OK)
-  {
-    /* wait until the read operation is finished */
-    while(BSP_SD_GetCardState()!= MSD_OK)
-    {
+    if (BSP_SD_ReadBlocks((uint32_t *) buff,
+                          (uint32_t) (sector),
+                          count, SD_TIMEOUT) == MSD_OK) {
+        /* wait until the read operation is finished */
+        while (BSP_SD_GetCardState() != MSD_OK) {
+        }
+        res = RES_OK;
     }
-    res = RES_OK;
-  }
 
-  return res;
+    return res;
 }
 
 /* USER CODE BEGIN beforeWriteSection */
@@ -178,21 +182,20 @@ DRESULT SD_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 
 DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
-  DRESULT res = RES_ERROR;
+    DRESULT res = RES_ERROR;
 
-  if(BSP_SD_WriteBlocks((uint32_t*)buff,
-                        (uint32_t)(sector),
-                        count, SD_TIMEOUT) == MSD_OK)
-  {
-	/* wait until the Write operation is finished */
-    while(BSP_SD_GetCardState() != MSD_OK)
-    {
+    if (BSP_SD_WriteBlocks((uint32_t *) buff,
+                           (uint32_t) (sector),
+                           count, SD_TIMEOUT) == MSD_OK) {
+        /* wait until the Write operation is finished */
+        while (BSP_SD_GetCardState() != MSD_OK) {
+        }
+        res = RES_OK;
     }
-    res = RES_OK;
-  }
 
-  return res;
+    return res;
 }
+
 #endif /* _USE_WRITE == 1 */
 
 /* USER CODE BEGIN beforeIoctlSection */
@@ -206,47 +209,48 @@ DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
   * @retval DRESULT: Operation result
   */
 #if _USE_IOCTL == 1
+
 DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
 {
-  DRESULT res = RES_ERROR;
-  BSP_SD_CardInfo CardInfo;
+    DRESULT res = RES_ERROR;
+    BSP_SD_CardInfo CardInfo;
 
-  if (Stat & STA_NOINIT) return RES_NOTRDY;
+    if (Stat & STA_NOINIT) return RES_NOTRDY;
 
-  switch (cmd)
-  {
-  /* Make sure that no pending write process */
-  case CTRL_SYNC :
-    res = RES_OK;
-    break;
+    switch (cmd) {
+        /* Make sure that no pending write process */
+        case CTRL_SYNC :
+            res = RES_OK;
+            break;
 
-  /* Get number of sectors on the disk (DWORD) */
-  case GET_SECTOR_COUNT :
-    BSP_SD_GetCardInfo(&CardInfo);
-    *(DWORD*)buff = CardInfo.LogBlockNbr;
-    res = RES_OK;
-    break;
+            /* Get number of sectors on the disk (DWORD) */
+        case GET_SECTOR_COUNT :
+            BSP_SD_GetCardInfo(&CardInfo);
+            *(DWORD *) buff = CardInfo.LogBlockNbr;
+            res = RES_OK;
+            break;
 
-  /* Get R/W sector size (WORD) */
-  case GET_SECTOR_SIZE :
-    BSP_SD_GetCardInfo(&CardInfo);
-    *(WORD*)buff = CardInfo.LogBlockSize;
-    res = RES_OK;
-    break;
+            /* Get R/W sector size (WORD) */
+        case GET_SECTOR_SIZE :
+            BSP_SD_GetCardInfo(&CardInfo);
+            *(WORD *) buff = CardInfo.LogBlockSize;
+            res = RES_OK;
+            break;
 
-  /* Get erase block size in unit of sector (DWORD) */
-  case GET_BLOCK_SIZE :
-    BSP_SD_GetCardInfo(&CardInfo);
-    *(DWORD*)buff = CardInfo.LogBlockSize / SD_DEFAULT_BLOCK_SIZE;
-    res = RES_OK;
-    break;
+            /* Get erase block size in unit of sector (DWORD) */
+        case GET_BLOCK_SIZE :
+            BSP_SD_GetCardInfo(&CardInfo);
+            *(DWORD *) buff = CardInfo.LogBlockSize / SD_DEFAULT_BLOCK_SIZE;
+            res = RES_OK;
+            break;
 
-  default:
-    res = RES_PARERR;
-  }
+        default:
+            res = RES_PARERR;
+    }
 
-  return res;
+    return res;
 }
+
 #endif /* _USE_IOCTL == 1 */
 
 /* USER CODE BEGIN afterIoctlSection */

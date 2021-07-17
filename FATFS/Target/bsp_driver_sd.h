@@ -22,7 +22,7 @@
 #define __STM32F4_SD_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -61,26 +61,42 @@
 /* USER CODE BEGIN BSP_H_CODE */
 /* Exported functions --------------------------------------------------------*/
 uint8_t BSP_SD_Init(void);
+
 uint8_t BSP_SD_ITConfig(void);
-void    BSP_SD_DetectIT(void);
-void    BSP_SD_DetectCallback(void);
+
+void BSP_SD_DetectIT(void);
+
+void BSP_SD_DetectCallback(void);
+
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
+
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);
+
 uint8_t BSP_SD_ReadBlocks_DMA(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks);
+
 uint8_t BSP_SD_WriteBlocks_DMA(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks);
+
 uint8_t BSP_SD_Erase(uint32_t StartAddr, uint32_t EndAddr);
+
 void BSP_SD_IRQHandler(void);
+
 void BSP_SD_DMA_Tx_IRQHandler(void);
+
 void BSP_SD_DMA_Rx_IRQHandler(void);
+
 uint8_t BSP_SD_GetCardState(void);
-void    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo);
+
+void BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo);
+
 uint8_t BSP_SD_IsDetected(void);
 
 /* These functions can be modified in case the current settings (e.g. DMA stream)
    need to be changed for specific application needs */
-void    BSP_SD_AbortCallback(void);
-void    BSP_SD_WriteCpltCallback(void);
-void    BSP_SD_ReadCpltCallback(void);
+void BSP_SD_AbortCallback(void);
+
+void BSP_SD_WriteCpltCallback(void);
+
+void BSP_SD_ReadCpltCallback(void);
 /* USER CODE END BSP_H_CODE */
 #endif
 

@@ -22,5 +22,6 @@
 #define SD_NOT_PRESENT           ((uint8_t)0x00)  /* also in bsp_driver_sd.h */
 #define SD_DETECT_PIN         GPIO_PIN_10
 #define SD_DETECT_GPIO_PORT   GPIOF
+
 /* Prototypes ---------------------------------------------------------------*/
-uint8_t	BSP_PlatformIsDetected(void);
+uint8_t BSP_PlatformIsDetected(void);

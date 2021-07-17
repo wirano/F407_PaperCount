@@ -29,12 +29,12 @@ FIL SDFile;       /* File object for SD */
 
 void MX_FATFS_Init(void)
 {
-  /*## FatFS: Link the SD driver ###########################*/
-  retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
+    /*## FatFS: Link the SD driver ###########################*/
+    retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
 
-  /* USER CODE BEGIN Init */
-  /* additional user code for init */
-  /* USER CODE END Init */
+    /* USER CODE BEGIN Init */
+    /* additional user code for init */
+    /* USER CODE END Init */
 }
 
 /**
@@ -44,9 +44,9 @@ void MX_FATFS_Init(void)
   */
 DWORD get_fattime(void)
 {
-  /* USER CODE BEGIN get_fattime */
-  return 0;
-  /* USER CODE END get_fattime */
+    /* USER CODE BEGIN get_fattime */
+    return 0;
+    /* USER CODE END get_fattime */
 }
 
 /* USER CODE BEGIN Application */

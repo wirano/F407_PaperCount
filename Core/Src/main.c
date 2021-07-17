@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,6 +45,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+SD_HandleTypeDef hsd;
+
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 
@@ -58,6 +61,14 @@ uint32_t int_cnt;
 uint64_t paper[200];
 
 uint8_t info = 1;
+
+FATFS fs;                 // Work area (file system object) for logical drive
+FIL fil;                  // file objects
+uint32_t byteswritten;                /* File write counts */
+uint32_t bytesread;                   /* File read counts */
+uint8_t wtext[] = "This is STM32 working with FatFs"; /* File write buffer */
+uint8_t rtext[100];                     /* File read buffers */
+uint8_t filename[] = "STM32cube.txt";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,6 +85,8 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 
 static void MX_USART3_UART_Init(void);
+
+static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
 void print_paper();
@@ -123,24 +136,79 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_TIM2_Init();
-  MX_TIM6_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_USART3_UART_Init();
-  /* USER CODE BEGIN 2 */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_TIM2_Init();
+    MX_TIM6_Init();
+    MX_USART1_UART_Init();
+    MX_USART2_UART_Init();
+    MX_USART3_UART_Init();
+    MX_SDIO_SD_Init();
+    MX_FATFS_Init();
+    /* USER CODE BEGIN 2 */
     shell_control_init();
     HAL_TIM_Base_Start(&htim2);
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    printf("\r\n ****** FatFs Example ******\r\n\r\n");
+    /*##-1- Register the file system object to the FatFs module ##############*/
+    retSD = f_mount(&fs, "", 0);
+    if (retSD) {
+        printf(" mount error : %d \r\n", retSD);
+        Error_Handler();
+    } else
+        printf(" mount sucess!!! \r\n");
+    /*##-2- Create and Open new text file objects with write access ######*/
+    retSD = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
+    if (retSD)
+        printf(" open file error : %d\r\n", retSD);
+    else
+        printf(" open file sucess!!! \r\n");
+    /*##-3- Write data to the text files ###############################*/
+    retSD = f_write(&fil, wtext, sizeof(wtext), (void *) &byteswritten);
+    if (retSD)
+        printf(" write file error : %d\r\n", retSD);
+    else {
+        printf(" write file sucess!!! \r\n");
+        printf(" write Data : %s\r\n", wtext);
+    }
+    /*##-4- Close the open text files ################################*/
+    retSD = f_close(&fil);
+    if (retSD)
+        printf(" close error : %d\r\n", retSD);
+    else
+        printf(" close sucess!!! \r\n");
+    /*##-5- Open the text files object with read access ##############*/
+    retSD = f_open(&fil, filename, FA_READ);
+    if (retSD)
+        printf(" open file error : %d\r\n", retSD);
+    else
+        printf(" open file sucess!!! \r\n");
+    /*##-6- Read data from the text files ##########################*/
+    retSD = f_read(&fil, rtext, sizeof(rtext), (UINT *) &bytesread);
+    if (retSD)
+        printf(" read error!!! %d\r\n", retSD);
+    else {
+        printf(" read sucess!!! \r\n");
+        printf(" read Data : %s\r\n", rtext);
+    }
+    /*##-7- Close the open text files ############################*/
+    retSD = f_close(&fil);
+    if (retSD)
+        printf(" close error!!! %d\r\n", retSD);
+    else
+        printf(" close sucess!!! \r\n");
+    /*##-8- Compare read data with the expected data ############*/
+    if (bytesread == byteswritten) {
+        printf(" FatFs is working well!!!\r\n");
+    }
+    /* USER CODE END 2 */
+
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
     while (1) {
@@ -203,8 +271,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 25;
   RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -218,13 +286,40 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Enables the Clock Security System
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) {
+        Error_Handler();
+    }
+    /** Enables the Clock Security System
+    */
+    HAL_RCC_EnableCSS();
+}
+
+/**
+  * @brief SDIO Initialization Function
+  * @param None
+  * @retval None
   */
-  HAL_RCC_EnableCSS();
+static void MX_SDIO_SD_Init(void)
+{
+
+    /* USER CODE BEGIN SDIO_Init 0 */
+
+    /* USER CODE END SDIO_Init 0 */
+
+    /* USER CODE BEGIN SDIO_Init 1 */
+
+    /* USER CODE END SDIO_Init 1 */
+    hsd.Instance = SDIO;
+    hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+    hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+    hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+    hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+    hsd.Init.ClockDiv = 0;
+    /* USER CODE BEGIN SDIO_Init 2 */
+
+    /* USER CODE END SDIO_Init 2 */
+
 }
 
 /**
@@ -235,7 +330,7 @@ void SystemClock_Config(void)
 static void MX_TIM2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+    /* USER CODE BEGIN TIM2_Init 0 */
 
   /* USER CODE END TIM2_Init 0 */
 
@@ -419,23 +514,32 @@ static void MX_USART3_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOF_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOG_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+    /*Configure GPIO pin : PF10 */
+    GPIO_InitStruct.Pin = GPIO_PIN_10;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : LED_Pin */
+    GPIO_InitStruct.Pin = LED_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
 }
 

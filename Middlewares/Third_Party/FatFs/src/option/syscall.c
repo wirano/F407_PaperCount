@@ -34,8 +34,8 @@
 */
 
 int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object */
-	BYTE vol,			/* Corresponding volume (logical drive number) */
-	_SYNC_t *sobj		/* Pointer to return the created sync object */
+    BYTE vol,			/* Corresponding volume (logical drive number) */
+    _SYNC_t *sobj		/* Pointer to return the created sync object */
 )
 {
 
@@ -75,7 +75,7 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 */
 
 int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to any error */
-	_SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
+    _SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
 )
 {
 #if _USE_MUTEX
@@ -96,7 +96,7 @@ int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to any erro
 */
 
 int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a grant */
-	_SYNC_t sobj	/* Sync object to wait */
+    _SYNC_t sobj	/* Sync object to wait */
 )
 {
   int ret = 0;
@@ -133,7 +133,7 @@ int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a gran
 */
 
 void ff_rel_grant (
-	_SYNC_t sobj	/* Sync object to be signaled */
+    _SYNC_t sobj	/* Sync object to be signaled */
 )
 {
 #if _USE_MUTEX
@@ -146,9 +146,7 @@ void ff_rel_grant (
 #endif
 
 
-
-
-#if _USE_LFN == 3	/* LFN with a working buffer on the heap */
+#if _USE_LFN == 3    /* LFN with a working buffer on the heap */
 /*------------------------------------------------------------------------*/
 /* Allocate a memory block                                                */
 /*------------------------------------------------------------------------*/
@@ -156,10 +154,10 @@ void ff_rel_grant (
 */
 
 void* ff_memalloc (	/* Returns pointer to the allocated memory block */
-	UINT msize		/* Number of bytes to allocate */
+    UINT msize		/* Number of bytes to allocate */
 )
 {
-	return ff_malloc(msize);	/* Allocate a new memory block with POSIX API */
+    return ff_malloc(msize);	/* Allocate a new memory block with POSIX API */
 }
 
 
@@ -168,10 +166,10 @@ void* ff_memalloc (	/* Returns pointer to the allocated memory block */
 /*------------------------------------------------------------------------*/
 
 void ff_memfree (
-	void* mblock	/* Pointer to the memory block to free */
+    void* mblock	/* Pointer to the memory block to free */
 )
 {
-	ff_free(mblock);	/* Discard the memory block with POSIX API */
+    ff_free(mblock);	/* Discard the memory block with POSIX API */
 }
 
 #endif
