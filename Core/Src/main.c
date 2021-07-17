@@ -54,6 +54,10 @@ UART_HandleTypeDef huart3;
 /* USER CODE BEGIN PV */
 uint32_t cnt_raw;
 uint64_t cnt_sum;
+uint32_t int_cnt;
+uint64_t paper[200];
+
+uint8_t info = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,9 +70,13 @@ static void MX_TIM2_Init(void);
 static void MX_TIM6_Init(void);
 
 static void MX_USART1_UART_Init(void);
+
 static void MX_USART2_UART_Init(void);
+
 static void MX_USART3_UART_Init(void);
+
 /* USER CODE BEGIN PFP */
+void print_paper();
 
 /* USER CODE END PFP */
 
@@ -98,6 +106,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
     uint32_t max = 0;
     uint32_t min = 0xffffffff;
+    uint8_t rsted = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -127,7 +136,7 @@ int main(void)
     shell_control_init();
     HAL_TIM_Base_Start(&htim2);
     HAL_TIM_Base_Start_IT(&htim6);
-    HAL_UART_Receive_IT(&huart3,&Usart3Buffer,1);
+    HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,10 +155,26 @@ int main(void)
             }
         }
 
-        logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld\r\n", cnt_raw, cnt_sum, max, min);
-    /* USER CODE END WHILE */
+        if (info) {
+            logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
+                    int_cnt, ScreenCmd.CorrectNum);
+        }
 
-    /* USER CODE BEGIN 3 */
+        SendScreenPaperNum(ScreenCmd.CorrectNum);
+        if (ScreenCmd.Start) {
+            if (rsted == 0) {
+                int_cnt = 0;
+                rsted = 1;
+            }
+        }
+
+        if (ScreenCmd.Finish) {
+            rsted = 0;
+            paper[ScreenCmd.CorrectNum] = cnt_sum;
+        }
+        /* USER CODE END WHILE */
+
+        /* USER CODE BEGIN 3 */
     }
 
 #pragma clang diagnostic pop
@@ -418,8 +443,8 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     static uint8_t p_start = 0, p_end = 21;
-    static uint32_t p=0;
-    static uint32_t cnt, int_cnt;
+    static uint32_t p = 0;
+    static uint32_t cnt;
     static uint32_t tmp[22];
     static uint32_t tmp_next[2];
     uint32_t ex_tmp;
@@ -432,12 +457,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         tmp[int_cnt - 51] = cnt;
     }
 
-    if(int_cnt >= 73){
+    if (int_cnt >= 73) {
         tmp_next[p++] = cnt;
     }
 
     if (int_cnt >= 72) {
-        if(p == 2){
+        if (p == 2) {
             p = 0;
             tmp[0] = tmp_next[0];
             tmp[21] = tmp_next[1];
@@ -446,7 +471,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             for (int j = 0; j < 21 - i; ++j) {
                 if (tmp[j] > tmp[j + 1]) {
                     ex_tmp = tmp[j];
-                    tmp[j] = tmp[j+1];
+                    tmp[j] = tmp[j + 1];
                     tmp[j] = ex_tmp;
                 }
             }
@@ -484,7 +509,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //    }
 //
 //    cnt_mid = tmp[10];
+}
+
+void print_paper()
+{
+    info = 0;
+
+    for (int i = 0; i < 200; ++i) {
+        logInfo("%d %lld", i, paper[i]);
     }
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), printp, print_paper, print paper);
 
 /* USER CODE END 4 */
 
@@ -494,12 +530,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-        /* User can add his own implementation to report the HAL error return state */
-        __disable_irq();
-        while (1) {
-        }
-  /* USER CODE END Error_Handler_Debug */
+    /* USER CODE BEGIN Error_Handler_Debug */
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1) {
+    }
+    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
