@@ -14,6 +14,8 @@ typedef struct
     uint16_t PaperNum;        //发送给屏幕的纸张数
     uint16_t CorrectNum;      //校准的纸张数
     uint8_t Finish;           //完成测量命令
+    uint8_t Stop;             //中止测量命令
+    uint8_t Correct;          //校准指令
 }ScreenCmdSt;
 
 void UsartScreenReceive(uint8_t data);                          //接收串口屏发送到单片机的数据

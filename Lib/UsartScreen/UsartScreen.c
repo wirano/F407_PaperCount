@@ -10,6 +10,8 @@ ScreenCmdSt ScreenCmd=
             .PaperNum=0,
             .CorrectNum=0,
             .Finish=1,
+            .Stop=0,
+            .Correct=0,
         };
 
 //接收串口屏发送到单片机的数据
@@ -54,23 +56,39 @@ void UsartScreenReceive(uint8_t data)
 //解析串口屏发送到单片机的数据
 void UsartScreenAnalysis(uint8_t *data_buffer)
 {
-    if(*(data_buffer+1)==0X01)
+    if(*(data_buffer+1)==0X01)                             //开始指令
     {
         ScreenCmd.Start=1;
         ScreenCmd.Finish=0;
+        ScreenCmd.Stop=0;
+        ScreenCmd.Correct=0;
 //        printf("Start\r\n");
     }
     else if(*(data_buffer+1)==0X02)                        //校准指令
     {
+        ScreenCmd.Start=0;
+        ScreenCmd.Finish=0;
+        ScreenCmd.Stop=0;
+        ScreenCmd.Correct=1;
         ScreenCmd.CorrectNum = ((data_buffer[3])<<8) | data_buffer[2];
 //        printf("Number=%d\r\n",ScreenCmd.CorrectNum);
     }
-    else if(*(data_buffer+1)==0X03)
+    else if(*(data_buffer+1)==0X03)                        //完成指令
     {
         ScreenCmd.Start=0;
         ScreenCmd.Finish=1;
+        ScreenCmd.Stop=0;
+        ScreenCmd.Correct=0;
 //        printf("Finish\r\n");
     }
+    else if(*(data_buffer+1)==0X04)                        //中止指令
+    {
+        ScreenCmd.Start=0;
+        ScreenCmd.Finish=0;
+        ScreenCmd.Stop=1;
+        ScreenCmd.Correct=0;
+    }
+//    SendScreenPaperNum(ScreenCmd.Stop);
 }
 
 //单片机向串口屏发送纸张数
