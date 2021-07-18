@@ -65,24 +65,31 @@ uint64_t paper[200];
 uint8_t info = 1;
 
 FATFS fs;                 // Work area (file system object) for logical drive
-FIL fil;                  // file objects
+FIL file;                  // file objects
 uint32_t byteswritten;                /* File write counts */
 uint32_t bytesread;                   /* File read counts */
-uint8_t wtext[] = "This is STM32 working with FatFs"; /* File write buffer */
-uint8_t rtext[100];                     /* File read buffers */
-uint8_t filename[] = "STM32cube.txt";
+uint8_t filename[] = "paper.csv";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
 static void MX_GPIO_Init(void);
+
 static void MX_DMA_Init(void);
+
 static void MX_TIM2_Init(void);
+
 static void MX_TIM6_Init(void);
+
 static void MX_USART1_UART_Init(void);
+
 static void MX_USART2_UART_Init(void);
+
 static void MX_USART3_UART_Init(void);
+
 static void MX_SDIO_SD_Init(void);
+
 /* USER CODE BEGIN PFP */
 void print_paper();
 
@@ -111,11 +118,11 @@ PUTCHAR_PROTOTYPE
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
     uint32_t max = 0;
     uint32_t min = 0xffffffff;
     uint8_t rsted = 0;
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
 
@@ -149,57 +156,23 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
-    printf("\r\n ****** FatFs Example ******\r\n\r\n");
-    /*##-1- Register the file system object to the FatFs module ##############*/
-    retSD = f_mount(&fs, "", 0);
+    if (BSP_SD_IsDetected() == SD_PRESENT) {
+        retSD = f_mount(&fs, "", 0);
+        if (retSD) {
+            logError("mount err:%d", retSD);
+        }
+    } else {
+        logError("NO SD Card plugged!");
+    }
+
+    retSD = f_open(&file, "", FA_OPEN_APPEND | FA_WRITE);
     if (retSD) {
-        printf(" mount error : %d \r\n", retSD);
-        Error_Handler();
-    } else
-        printf(" mount sucess!!! \r\n");
-    /*##-2- Create and Open new text file objects with write access ######*/
-    retSD = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
-    if (retSD)
-        printf(" open file error : %d\r\n", retSD);
-    else
-        printf(" open file sucess!!! \r\n");
-    /*##-3- Write data to the text files ###############################*/
-    retSD = f_write(&fil, wtext, sizeof(wtext), (void *) &byteswritten);
-    if (retSD)
-        printf(" write file error : %d\r\n", retSD);
-    else {
-        printf(" write file sucess!!! \r\n");
-        printf(" write Data : %s\r\n", wtext);
+        logError("file open err:%d", retSD);
     }
-    /*##-4- Close the open text files ################################*/
-    retSD = f_close(&fil);
-    if (retSD)
-        printf(" close error : %d\r\n", retSD);
-    else
-        printf(" close sucess!!! \r\n");
-    /*##-5- Open the text files object with read access ##############*/
-    retSD = f_open(&fil, filename, FA_READ);
-    if (retSD)
-        printf(" open file error : %d\r\n", retSD);
-    else
-        printf(" open file sucess!!! \r\n");
-    /*##-6- Read data from the text files ##########################*/
-    retSD = f_read(&fil, rtext, sizeof(rtext), (UINT *) &bytesread);
-    if (retSD)
-        printf(" read error!!! %d\r\n", retSD);
-    else {
-        printf(" read sucess!!! \r\n");
-        printf(" read Data : %s\r\n", rtext);
-    }
-    /*##-7- Close the open text files ############################*/
-    retSD = f_close(&fil);
-    if (retSD)
-        printf(" close error!!! %d\r\n", retSD);
-    else
-        printf(" close sucess!!! \r\n");
-    /*##-8- Compare read data with the expected data ############*/
-    if (bytesread == byteswritten) {
-        printf(" FatFs is working well!!!\r\n");
+    f_printf(&file, "cnt_raw cnt_sum max min cnt_int paper_cnt\r\n");
+    retSD = f_close(&file);
+    if (retSD) {
+        logError("file close err:%d", retSD);
     }
     /* USER CODE END 2 */
 
@@ -222,6 +195,16 @@ int main(void)
         if (info) {
             logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
+            retSD = f_open(&file, "", FA_OPEN_APPEND | FA_WRITE);
+            if (retSD) {
+                logError("file open err:%d", retSD);
+            }
+            f_printf(&file, "%ld %lld %ld %ld %ld %d\r\n", cnt_raw, cnt_sum, max, min,
+                     int_cnt, ScreenCmd.CorrectNum);
+            retSD = f_close(&file);
+            if (retSD) {
+                logError("file close err:%d", retSD);
+            }
         }
 
         SendScreenPaperNum(ScreenCmd.CorrectNum);
@@ -242,7 +225,7 @@ int main(void)
     }
 
 #pragma clang diagnostic pop
-  /* USER CODE END 3 */
+    /* USER CODE END 3 */
 }
 
 /**
@@ -327,41 +310,38 @@ static void MX_TIM2_Init(void)
 
     /* USER CODE BEGIN TIM2_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+    /* USER CODE END TIM2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+    /* USER CODE BEGIN TIM2_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4294967295;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_ETRMODE2;
-  sClockSourceConfig.ClockPolarity = TIM_CLOCKPOLARITY_NONINVERTED;
-  sClockSourceConfig.ClockPrescaler = TIM_CLOCKPRESCALER_DIV1;
-  sClockSourceConfig.ClockFilter = 0;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM2_Init 2 */
+    /* USER CODE END TIM2_Init 1 */
+    htim2.Instance = TIM2;
+    htim2.Init.Prescaler = 0;
+    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim2.Init.Period = 4294967295;
+    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_ETRMODE2;
+    sClockSourceConfig.ClockPolarity = TIM_CLOCKPOLARITY_NONINVERTED;
+    sClockSourceConfig.ClockPrescaler = TIM_CLOCKPRESCALER_DIV1;
+    sClockSourceConfig.ClockFilter = 0;
+    if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM2_Init 2 */
 
-  /* USER CODE END TIM2_Init 2 */
+    /* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -373,33 +353,31 @@ static void MX_TIM2_Init(void)
 static void MX_TIM6_Init(void)
 {
 
-  /* USER CODE BEGIN TIM6_Init 0 */
+    /* USER CODE BEGIN TIM6_Init 0 */
 
-  /* USER CODE END TIM6_Init 0 */
+    /* USER CODE END TIM6_Init 0 */
 
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM6_Init 1 */
+    /* USER CODE BEGIN TIM6_Init 1 */
 
-  /* USER CODE END TIM6_Init 1 */
-  htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 8400-1;
-  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 500;
-  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM6_Init 2 */
+    /* USER CODE END TIM6_Init 1 */
+    htim6.Instance = TIM6;
+    htim6.Init.Prescaler = 8400 - 1;
+    htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim6.Init.Period = 500;
+    htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
+        Error_Handler();
+    }
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM6_Init 2 */
 
-  /* USER CODE END TIM6_Init 2 */
+    /* USER CODE END TIM6_Init 2 */
 
 }
 
@@ -411,28 +389,27 @@ static void MX_TIM6_Init(void)
 static void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
+    /* USER CODE BEGIN USART1_Init 0 */
 
-  /* USER CODE END USART1_Init 0 */
+    /* USER CODE END USART1_Init 0 */
 
-  /* USER CODE BEGIN USART1_Init 1 */
+    /* USER CODE BEGIN USART1_Init 1 */
 
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
+    /* USER CODE END USART1_Init 1 */
+    huart1.Instance = USART1;
+    huart1.Init.BaudRate = 115200;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Mode = UART_MODE_TX_RX;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart1) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+    /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -444,28 +421,27 @@ static void MX_USART1_UART_Init(void)
 static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART2_Init 0 */
+    /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END USART2_Init 0 */
+    /* USER CODE END USART2_Init 0 */
 
-  /* USER CODE BEGIN USART2_Init 1 */
+    /* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
+    /* USER CODE END USART2_Init 1 */
+    huart2.Instance = USART2;
+    huart2.Init.BaudRate = 115200;
+    huart2.Init.WordLength = UART_WORDLENGTH_8B;
+    huart2.Init.StopBits = UART_STOPBITS_1;
+    huart2.Init.Parity = UART_PARITY_NONE;
+    huart2.Init.Mode = UART_MODE_TX_RX;
+    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart2) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END USART2_Init 2 */
+    /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -477,11 +453,11 @@ static void MX_USART2_UART_Init(void)
 static void MX_USART3_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART3_Init 0 */
+    /* USER CODE BEGIN USART3_Init 0 */
 
-  /* USER CODE END USART3_Init 0 */
+    /* USER CODE END USART3_Init 0 */
 
-  /* USER CODE BEGIN USART3_Init 1 */
+    /* USER CODE BEGIN USART3_Init 1 */
 
     /* USER CODE END USART3_Init 1 */
     huart3.Instance = USART3;
