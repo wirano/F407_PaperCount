@@ -720,12 +720,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //        paper_fit = p1 * pow(cnt_sum, 3) + p2 * pow(cnt_sum, 2) + p3 * pow(cnt_sum, 1) + p4 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 2) + p2 * pow(cnt_sum, 1) + p3 * pow(cnt_sum, 0);
         // 4阶高斯
-        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
-        // 5阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-//                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
-//                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
+//                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
+        // 5阶高斯
+        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
+                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
+                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
         // 8阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
