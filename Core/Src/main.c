@@ -387,12 +387,14 @@ int main(void)
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             rsted = 0;
             info = 0;
+            sample_cnt = 0;
             paper[ScreenCmd.CorrectNum] = cnt_sum;
         }
         if (ScreenCmd.Stop) {
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             rsted = 0;
             info = 0;
+            sample_cnt = 0;
         }
 
         if (cnt_raw > 3000) {
