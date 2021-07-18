@@ -151,18 +151,31 @@ UART_HandleTypeDef huart3;
 //const double b4 = 1.785e+06;
 //const double c4 = 9.23e+04;
 
-const double a1 = 2.291e+14;
-const double b1 = 2.476e+06;
-const double c1 = 1.201e+05;
-const double a2 = 10.76;
-const double b2 = 1.803e+06;
-const double c2 = 2.768e+04;
-const double a3 = 5.187;
-const double b3 = 1.777e+06;
-const double c3 = 6.861e+04;
-const double a4 = 1.826e+13;
-const double b4 = 1.331e+07;
-const double c4 = 2.211e+06;
+//const double a1 = 2.291e+14;
+//const double b1 = 2.476e+06;
+//const double c1 = 1.201e+05;
+//const double a2 = 10.76;
+//const double b2 = 1.803e+06;
+//const double c2 = 2.768e+04;
+//const double a3 = 5.187;
+//const double b3 = 1.777e+06;
+//const double c3 = 6.861e+04;
+//const double a4 = 1.826e+13;
+//const double b4 = 1.331e+07;
+//const double c4 = 2.211e+06;
+
+const double a1 = 1.431e+14;
+const double b1 = 2.288e+06;
+const double c1 = 8.523e+04;
+const double a2 = 1.453;
+const double b2 = 1.792e+06;
+const double c2 = 1.302e+04;
+const double a3 = 2941;
+const double b3 = 2.373e+06;
+const double c3 = 2.539e+05;
+const double a4 = 1.173e+05;
+const double b4 = 5.672e+06;
+const double c4 = 1.34e+06;
 
 
 double paper_fit;
