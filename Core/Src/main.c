@@ -251,6 +251,23 @@ const double a5 = 180.7;
 const double b5 = 2.831e+06;
 const double c5 = 7.44e+05;
 
+//分段拟合31-60
+const double sa1 = 29.18;
+const double sb1 = 1.82e+06;
+const double sc1 = 9457;
+const double sa2 = 5.08;
+const double sb2 = 1.807e+06;
+const double sc2 = 5680;
+const double sa3 = 10.44;
+const double sb3 = 1.797e+06;
+const double sc3 = 1.517e+04;
+const double sa4 = -1.373;
+const double sb4 = 1.792e+06;
+const double sc4 = 3977;
+const double sa5 = 36.46;
+const double sb5 = 1.797e+06;
+const double sc5 = 1.013e+05;
+
 
 double paper_fit;
 uint16_t paper_cnt;
@@ -711,6 +728,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #ifndef SAMPLING
     if (int_cnt == 100 && sample_cnt < 3) {
         int_cnt = 0;
+        if (cnt_sum < 1755000) {
+            //0-30
+
 //        paper_fit = a * exp(b * cnt_sum) + c * exp(d * cnt_sum);
 //        paper_fit = p1 * pow(cnt_sum, 8) + p2 * pow(cnt_sum, 7) + p3 * pow(cnt_sum, 6) + p4 * pow(cnt_sum, 5) +
 //                    p5 * pow(cnt_sum, 4) + p6 * pow(cnt_sum, 3) + p7 * pow(cnt_sum, 2) + p8 * pow(cnt_sum, 1) +
@@ -719,20 +739,28 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //                    p5 * pow(cnt_sum, 2) + p6 * pow(cnt_sum, 1) + p7 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 3) + p2 * pow(cnt_sum, 2) + p3 * pow(cnt_sum, 1) + p4 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 2) + p2 * pow(cnt_sum, 1) + p3 * pow(cnt_sum, 0);
-        // 4阶高斯
+            // 4阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
-        // 5阶高斯
-        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
-                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
-        // 8阶高斯
+            // 5阶高斯
+            paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
+                        a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
+                        a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
+            // 8阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
 //                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2)) + a6 * exp(-pow(((cnt_sum - b6) / c6), 2)) +
 //                    a7 * exp(-pow(((cnt_sum - b7) / c7), 2)) + a8 * exp(-pow(((cnt_sum - b8) / c8), 2));
 //        paper_fit = a0 + a1 * cos(cnt_sum * w) + b1 * sin(cnt_sum * w) + a2 * cos(cnt_sum * w) + b2 * sin(cnt_sum * w) +
 //                    a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w) + a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w);
+        } else {
+            //31-60
+
+            // 5阶高斯
+            paper_fit = sa1 * exp(-pow(((cnt_sum - sb1) / sc1), 2)) + sa2 * exp(-pow(((cnt_sum - sb2) / sc2), 2)) +
+                        sa3 * exp(-pow(((cnt_sum - sb3) / sc3), 2)) + sa4 * exp(-pow(((cnt_sum - sb4) / sc4), 2)) +
+                        sa5 * exp(-pow(((cnt_sum - sb5) / sc5), 2));
+        }
         sample_data[sample_cnt++] = paper_fit;
     }
 
@@ -746,6 +774,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             sample_cnt = 0;
             paper_cnt = (uint16_t) round(sample_data[0]);
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
+            info = 0;
         } else {
             sample_cnt = 0;
             paper_cnt = 0;
