@@ -177,19 +177,50 @@ UART_HandleTypeDef huart3;
 //const double b4 = 5.672e+06;
 //const double c4 = 1.34e+06;
 
-const double a1 = 1.136e+15;
-const double b1 = 3.671e+06;
-const double c1 = 3.304e+05;
-const double a2 = 1.837;
-const double b2 = 1.786e+06;
-const double c2 = 1.036e+04;
-const double a3 = 1.33;
-const double b3 = 1.762e+06;
-const double c3 = 1.206e+04;
-const double a4 = 7.864e+06;
-const double b4 = 6.625e+06;
-const double c4 = 1.373e+06;
+//const double a1 = 1.136e+15;
+//const double b1 = 3.671e+06;
+//const double c1 = 3.304e+05;
+//const double a2 = 1.837;
+//const double b2 = 1.786e+06;
+//const double c2 = 1.036e+04;
+//const double a3 = 1.33;
+//const double b3 = 1.762e+06;
+//const double c3 = 1.206e+04;
+//const double a4 = 7.864e+06;
+//const double b4 = 6.625e+06;
+//const double c4 = 1.373e+06;
 
+//const double a1 = 194;
+//const double b1 = 1.863e+06;
+//const double c1 = 2.868e+04;
+//const double a2 = 7.197;
+//const double b2 = 1.798e+06;
+//const double c2 = 2.484e+04;
+//const double a3 = 530.1;
+//const double b3 = 2.47e+06;
+//const double c3 = 3.876e+05;
+//const double a4 = 1.353;
+//const double b4 = 1.755e+06;
+//const double c4 = 1.279e+04;
+//const double a5 = 14.43;
+//const double b5 = 2.033e+06;
+//const double c5 = 5.751e+05;
+
+const double a1 = 1.054e+15;
+const double b1 = 3.526e+06;
+const double c1 = 3.053e+05;
+const double a2 = 2.672;
+const double b2 = 1.788e+06;
+const double c2 = 1.047e+04;
+const double a3 = 1.389;
+const double b3 = 1.763e+06;
+const double c3 = 9646;
+const double a4 = 1.199;
+const double b4 = 1.748e+06;
+const double c4 = 9302;
+const double a5 = 2.621e+07;
+const double b5 = 7.178e+06;
+const double c5 = 1.46e+06;
 
 double paper_fit;
 uint16_t paper_cnt;
@@ -655,12 +686,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //                    p5 * pow(cnt_sum, 2) + p6 * pow(cnt_sum, 1) + p7 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 3) + p2 * pow(cnt_sum, 2) + p3 * pow(cnt_sum, 1) + p4 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 2) + p2 * pow(cnt_sum, 1) + p3 * pow(cnt_sum, 0);
+        // 4阶高斯
+//        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
+//                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
+        // 5阶高斯
+        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
+                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
+                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
+        // 8阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
 //                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2)) + a6 * exp(-pow(((cnt_sum - b6) / c6), 2)) +
 //                    a7 * exp(-pow(((cnt_sum - b7) / c7), 2)) + a8 * exp(-pow(((cnt_sum - b8) / c8), 2));
-        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
 //        paper_fit = a0 + a1 * cos(cnt_sum * w) + b1 * sin(cnt_sum * w) + a2 * cos(cnt_sum * w) + b2 * sin(cnt_sum * w) +
 //                    a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w) + a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w);
         sample_data[sample_cnt++] = paper_fit;
