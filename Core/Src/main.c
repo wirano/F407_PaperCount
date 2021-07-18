@@ -165,7 +165,7 @@ int main(void)
         logError("NO SD Card plugged!");
     }
 
-    retSD = f_open(&file, "", FA_OPEN_APPEND | FA_WRITE);
+    retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE);
     if (retSD) {
         logError("file open err:%d", retSD);
     }
@@ -195,11 +195,11 @@ int main(void)
         if (info) {
             logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
-            retSD = f_open(&file, "", FA_OPEN_APPEND | FA_WRITE);
+            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE);
             if (retSD) {
                 logError("file open err:%d", retSD);
             }
-            f_printf(&file, "%ld %lld %ld %ld %ld %d\r\n", cnt_raw, cnt_sum, max, min,
+            f_printf(&file, "%ld %ld %ld %ld %ld %d\r\n", cnt_raw, cnt_sum, max, min,
                      int_cnt, ScreenCmd.CorrectNum);
             retSD = f_close(&file);
             if (retSD) {
