@@ -104,7 +104,6 @@ DRESULT disk_write(
     res = disk.drv[pdrv]->disk_write(disk.lun[pdrv], buff, sector, count);
     return res;
 }
-
 #endif /* _USE_WRITE == 1 */
 
 /**
