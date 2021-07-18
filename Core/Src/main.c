@@ -41,7 +41,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define SAMPLING
+//#define SAMPLING
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -138,18 +138,31 @@ UART_HandleTypeDef huart3;
 //const double b8 = 1.878e+06;
 //const double c8 = 1.693e+05;
 
-const double a1 = 8.726;
-const double b1 = 1.802e+06;
-const double c1 = 5756;
-const double a2 = 8.232;
-const double b2 = 1.794e+06;
-const double c2 = 1.466e+04;
-const double a3 = 0;
-const double b3 = 1.774e+06;
-const double c3 = 188.4;
-const double a4 = 36.28;
-const double b4 = 1.785e+06;
-const double c4 = 9.23e+04;
+//const double a1 = 8.726;
+//const double b1 = 1.802e+06;
+//const double c1 = 5756;
+//const double a2 = 8.232;
+//const double b2 = 1.794e+06;
+//const double c2 = 1.466e+04;
+//const double a3 = 0;
+//const double b3 = 1.774e+06;
+//const double c3 = 188.4;
+//const double a4 = 36.28;
+//const double b4 = 1.785e+06;
+//const double c4 = 9.23e+04;
+
+const double a1 = 2.291e+14;
+const double b1 = 2.476e+06;
+const double c1 = 1.201e+05;
+const double a2 = 10.76;
+const double b2 = 1.803e+06;
+const double c2 = 2.768e+04;
+const double a3 = 5.187;
+const double b3 = 1.777e+06;
+const double c3 = 6.861e+04;
+const double a4 = 1.826e+13;
+const double b4 = 1.331e+07;
+const double c4 = 2.211e+06;
 
 
 double paper_fit;
@@ -159,7 +172,7 @@ uint32_t cnt_raw;
 uint64_t cnt_sum;
 uint32_t int_cnt;
 uint8_t sample_cnt;
-uint16_t sample_data[3];
+double sample_data[3];
 uint8_t rsted = 0;
 
 uint64_t paper[200];
@@ -285,7 +298,7 @@ int main(void)
         }
 
         if (info) {
-            logInfo("cnt_raw:%ld s1:%ld s2:%ld s3:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
+            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
                     cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
         }
@@ -624,16 +637,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                     a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
 //        paper_fit = a0 + a1 * cos(cnt_sum * w) + b1 * sin(cnt_sum * w) + a2 * cos(cnt_sum * w) + b2 * sin(cnt_sum * w) +
 //                    a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w) + a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w);
-        sample_data[sample_cnt++] = (uint16_t )round(paper_fit);
+        sample_data[sample_cnt++] = paper_fit;
     }
 
     if (sample_cnt == 3) {
-        logDebug("%ld %ld %ld",sample_data[0],sample_data[1],sample_data[2]);
-        if (sample_data[0] == sample_data[1] && sample_data[0] == sample_data[2] && sample_data[1] == sample_data[2]) {
+        logDebug("%.2lf %.2lf %.2lf", sample_data[0], sample_data[1], sample_data[2]);
+        if (round(sample_data[0]) == round(sample_data[1]) &&
+            round(sample_data[0]) == round(sample_data[2]) &&
+            round(sample_data[1]) == round(sample_data[2])) {
             rsted = 0;
             ScreenCmd.Start = 0;
             sample_cnt = 0;
-            paper_cnt = sample_data[0];
+            paper_cnt = (uint16_t) round(sample_data[0]);
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
         } else {
             sample_cnt = 0;
