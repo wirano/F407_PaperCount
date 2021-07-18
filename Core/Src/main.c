@@ -206,21 +206,34 @@ UART_HandleTypeDef huart3;
 //const double b5 = 2.033e+06;
 //const double c5 = 5.751e+05;
 
-const double a1 = 1.054e+15;
-const double b1 = 3.526e+06;
-const double c1 = 3.053e+05;
-const double a2 = 2.672;
-const double b2 = 1.788e+06;
-const double c2 = 1.047e+04;
-const double a3 = 1.389;
-const double b3 = 1.763e+06;
-const double c3 = 9646;
-const double a4 = 1.199;
-const double b4 = 1.748e+06;
-const double c4 = 9302;
-const double a5 = 2.621e+07;
-const double b5 = 7.178e+06;
-const double c5 = 1.46e+06;
+const double a1 = 2.874;
+const double b1 = 1.754e+06;
+const double c1 = 1.488e+04;
+const double a2 = 0.4416;
+const double b2 = 1.719e+06;
+const double c2 = 9437;
+const double a3 = 3.806;
+const double b3 = 1.768e+06;
+const double c3 = 8.892e+04;
+const double a4 = 1.73e+15;
+const double b4 = 1.562e+07;
+const double c4 = 2.454e+06;
+
+//const double a1 = 1.054e+15;
+//const double b1 = 3.526e+06;
+//const double c1 = 3.053e+05;
+//const double a2 = 2.672;
+//const double b2 = 1.788e+06;
+//const double c2 = 1.047e+04;
+//const double a3 = 1.389;
+//const double b3 = 1.763e+06;
+//const double c3 = 9646;
+//const double a4 = 1.199;
+//const double b4 = 1.748e+06;
+//const double c4 = 9302;
+//const double a5 = 2.621e+07;
+//const double b5 = 7.178e+06;
+//const double c5 = 1.46e+06;
 
 double paper_fit;
 uint16_t paper_cnt;
@@ -687,12 +700,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //        paper_fit = p1 * pow(cnt_sum, 3) + p2 * pow(cnt_sum, 2) + p3 * pow(cnt_sum, 1) + p4 * pow(cnt_sum, 0);
 //        paper_fit = p1 * pow(cnt_sum, 2) + p2 * pow(cnt_sum, 1) + p3 * pow(cnt_sum, 0);
         // 4阶高斯
-//        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-//                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
-        // 5阶高斯
         paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
-                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
+                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
+        // 5阶高斯
+//        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
+//                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
+//                    a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
         // 8阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
