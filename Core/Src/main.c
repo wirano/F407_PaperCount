@@ -206,18 +206,18 @@ UART_HandleTypeDef huart3;
 //const double b5 = 2.033e+06;
 //const double c5 = 5.751e+05;
 
-const double a1 = 2.874;
-const double b1 = 1.754e+06;
-const double c1 = 1.488e+04;
-const double a2 = 0.4416;
-const double b2 = 1.719e+06;
-const double c2 = 9437;
-const double a3 = 3.806;
-const double b3 = 1.768e+06;
-const double c3 = 8.892e+04;
-const double a4 = 1.73e+15;
-const double b4 = 1.562e+07;
-const double c4 = 2.454e+06;
+//const double a1 = 2.874;
+//const double b1 = 1.754e+06;
+//const double c1 = 1.488e+04;
+//const double a2 = 0.4416;
+//const double b2 = 1.719e+06;
+//const double c2 = 9437;
+//const double a3 = 3.806;
+//const double b3 = 1.768e+06;
+//const double c3 = 8.892e+04;
+//const double a4 = 1.73e+15;
+//const double b4 = 1.562e+07;
+//const double c4 = 2.454e+06;
 
 //const double a1 = 1.054e+15;
 //const double b1 = 3.526e+06;
@@ -235,6 +235,23 @@ const double c4 = 2.454e+06;
 //const double b5 = 7.178e+06;
 //const double c5 = 1.46e+06;
 
+const double a1 = 4.345;
+const double b1 = 1.743e+06;
+const double c1 = 6.402e+04;
+const double a2 = -0.3796;
+const double b2 = 1.708e+06;
+const double c2 = 8627;
+const double a3 = 1.311;
+const double b3 = 1.737e+06;
+const double c3 = 1.177e+04;
+const double a4 = 1.597e+14;
+const double b4 = 2.193e+06;
+const double c4 = 7.912e+04;
+const double a5 = 180.7;
+const double b5 = 2.831e+06;
+const double c5 = 7.44e+05;
+
+
 double paper_fit;
 uint16_t paper_cnt;
 
@@ -247,7 +264,7 @@ uint8_t rsted = 0;
 
 uint64_t paper[200];
 
-uint8_t info = 1;
+uint8_t info = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -345,17 +362,20 @@ int main(void)
                 sample_cnt = 0;
                 int_cnt = 0;
                 rsted = 1;
+                info = 1;
             }
         }
 
         if (ScreenCmd.Finish) {
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             rsted = 0;
+            info = 0;
             paper[ScreenCmd.CorrectNum] = cnt_sum;
         }
         if (ScreenCmd.Stop) {
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             rsted = 0;
+            info = 0;
         }
 
         if (cnt_raw > 3000) {
