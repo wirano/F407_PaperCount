@@ -257,21 +257,53 @@ const double b5 = 2.831e+06;
 const double c5 = 7.44e+05;
 
 //分段拟合31-60
-const double sa1 = 29.18;
-const double sb1 = 1.82e+06;
-const double sc1 = 9457;
-const double sa2 = 5.08;
-const double sb2 = 1.807e+06;
-const double sc2 = 5680;
-const double sa3 = 10.44;
-const double sb3 = 1.797e+06;
-const double sc3 = 1.517e+04;
-const double sa4 = -1.373;
-const double sb4 = 1.792e+06;
-const double sc4 = 3977;
-const double sa5 = 36.46;
-const double sb5 = 1.797e+06;
-const double sc5 = 1.013e+05;
+//const double sa1 = 29.18;
+//const double sb1 = 1.82e+06;
+//const double sc1 = 9457;
+//const double sa2 = 5.08;
+//const double sb2 = 1.807e+06;
+//const double sc2 = 5680;
+//const double sa3 = 10.44;
+//const double sb3 = 1.797e+06;
+//const double sc3 = 1.517e+04;
+//const double sa4 = -1.373;
+//const double sb4 = 1.792e+06;
+//const double sc4 = 3977;
+//const double sa5 = 36.46;
+//const double sb5 = 1.797e+06;
+//const double sc5 = 1.013e+05;
+
+//const double sa1 = 39.0997499875822;
+//const double sa2 = 4.54969891573061;
+//const double sa3 = 17.4789905466391;
+//const double sa4 = -1.29353078245377;
+//const double sa5 = 33.2706648594671;
+//const double sb1 = 1820348.28936334;
+//const double sb2 = 1806697.33574431;
+//const double sb3 = 1799434.67168167;
+//const double sb4 = 1792137.08628014;
+//const double sb5 = 1774328.67041329;
+//const double sc1 = 10433.5475450764;
+//const double sc2 = 5537.01382155798;
+//const double sc3 = 18061.7881116977;
+//const double sc4 = 3895.38922030636;
+//const double sc5 = 66172.0785627557;
+
+const double sa1 = 754100000000000;
+const double sa2 = 3.82776401425761;
+const double sa3 = 0.802157285611722;
+const double sa4 = 3.64789928451680;
+const double sa5 = 77.2537607944371;
+const double sb1 = 2524108.05235213;
+const double sb2 = 1806174.52041500;
+const double sb3 = 1796465.11090915;
+const double sb4 = 1789052.37223415;
+const double sb5 = 2008777.69867117;
+const double sc1 = 125872.759968345;
+const double sc2 = 9175.28730247511;
+const double sc3 = 1367.61857462206;
+const double sc4 = 9916.34116648308;
+const double sc5 = 263978.2607868750;
 
 
 double paper_fit;
@@ -287,7 +319,6 @@ uint8_t rsted = 0;
 uint64_t paper[200];
 
 uint8_t info = 0;
-uint8_t info = 1;
 
 FATFS fs;                 // Work area (file system object) for logical drive
 FIL file;                  // file objects
@@ -373,28 +404,28 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
-    if (BSP_SD_IsDetected() == SD_PRESENT) {
-        retSD = f_mount(&fs, "", 0);
-        if (retSD) {
-            logError("mount err:%d", retSD);
-        }
-    } else {
-        logError("NO SD Card plugged!");
-    }
-
-    retSD = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
-    if (retSD) {
-        logError("file open err:%d", retSD);
-    }
-    f_printf(&file, "cnt_raw,cnt_sum,max,min,cnt_int,paper_cnt\r\n");
-    retSD = f_close(&file);
-    if (retSD) {
-        logError("file close err:%d", retSD);
-    }
+//    if (BSP_SD_IsDetected() == SD_PRESENT) {
+//        retSD = f_mount(&fs, "", 0);
+//        if (retSD) {
+//            logError("mount err:%d", retSD);
+//        }
+//    } else {
+//        logError("NO SD Card plugged!");
+//    }
+//
+//    retSD = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+//    if (retSD) {
+//        logError("file open err:%d", retSD);
+//    }
+//    f_printf(&file, "cnt_raw,cnt_sum,max,min,cnt_int,paper_cnt\r\n");
+//    retSD = f_close(&file);
+//    if (retSD) {
+//        logError("file close err:%d", retSD);
+//    }
     /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
     while (1) {
@@ -403,19 +434,21 @@ int main(void)
 
         SendScreenPaperNum(paper_cnt);
         if (info) {
-            logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
+            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
+                    cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
-            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
-            if (retSD) {
-                logError("file open err:%d", retSD);
-            }
-            sprintf(str_buffer, "%ld,%lld,%ld,%ld,%ld,%d\r\n", cnt_raw, cnt_sum, max, min,
-                    int_cnt, ScreenCmd.CorrectNum);
-            f_printf(&file, "%s", str_buffer);
-            retSD = f_close(&file);
-            if (retSD) {
-                logError("file close err:%d", retSD);
-            }
+
+//            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+//            if (retSD) {
+//                logError("file open err:%d", retSD);
+//            }
+//            sprintf(str_buffer, "%ld,%lld,%ld,%ld,%ld,%d\r\n", cnt_raw, cnt_sum, max, min,
+//                    int_cnt, ScreenCmd.CorrectNum);
+//            f_printf(&file, "%s", str_buffer);
+//            retSD = f_close(&file);
+//            if (retSD) {
+//                logError("file close err:%d", retSD);
+//            }
         }
 
         SendScreenPaperNum(ScreenCmd.CorrectNum);
@@ -455,9 +488,6 @@ int main(void)
         }
 
         if (info) {
-            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
-                    cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
-                    int_cnt, ScreenCmd.CorrectNum);
         }
 
 
