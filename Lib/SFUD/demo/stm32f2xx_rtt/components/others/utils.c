@@ -11,23 +11,28 @@
 #define SW_VER_LENGTH        3
 #define HW_VER_LENGTH        2
 
-/* µ±Ç°ÏµÍ³×´Ì¬ */
+/* ï¿½ï¿½Ç°ÏµÍ³×´Ì¬ */
 static SystemStatus cur_system_status = SYSTEM_STATUS_INIT;
 
-//Èí¼þ°æ±¾ºÅ¶¨Òå
-const char sw_ver_name[] @ ".version" = "swver";
-const char sw_ver_value[] @ ".version" = "0.06.23";
-//Ó²¼þ°æ±¾ºÅ¶¨Òå
-const char hw_ver_name[] @ ".version" = "hwver";
-const char hw_ver_value[] @ ".version" = "1.0";
-//ÈíÓ²¼þ°æ±¾£¬¸ù¾ÝÉÏÃæµÄ¶¨Òå£¬È·¶¨Î»Êý
-static uint8_t software_version[SW_VER_LENGTH] = { 0 };
-static uint8_t hardware_version[HW_VER_LENGTH] = { 0 };
+//ï¿½ï¿½ï¿½ï¿½æ±¾ï¿½Å¶ï¿½ï¿½ï¿½
+const char sw_ver_name[]
+@ ".version" = "swver";
+const char sw_ver_value[]
+@ ".version" = "0.06.23";
+//Ó²ï¿½ï¿½ï¿½æ±¾ï¿½Å¶ï¿½ï¿½ï¿½
+const char hw_ver_name[]
+@ ".version" = "hwver";
+const char hw_ver_value[]
+@ ".version" = "1.0";
+//ï¿½ï¿½Ó²ï¿½ï¿½ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¶ï¿½ï¿½å£¬È·ï¿½ï¿½Î»ï¿½ï¿½
+static uint8_t software_version[SW_VER_LENGTH] = {0};
+static uint8_t hardware_version[HW_VER_LENGTH] = {0};
 
 /**
  * System go to fault status.
  */
-void system_go_to_fault_status(void){
+void system_go_to_fault_status(void)
+{
     cur_system_status = SYSTEM_STATUS_FAULT;
 }
 
@@ -36,7 +41,8 @@ void system_go_to_fault_status(void){
  *
  * @param status system status
  */
-void set_system_status(SystemStatus status){
+void set_system_status(SystemStatus status)
+{
     cur_system_status = status;
 }
 
@@ -45,7 +51,8 @@ void set_system_status(SystemStatus status){
  *
  * @return current system status
  */
-SystemStatus get_system_status(void){
+SystemStatus get_system_status(void)
+{
     return cur_system_status;
 }
 
@@ -54,7 +61,8 @@ SystemStatus get_system_status(void){
  *
  * @return hardware version
  */
-char const *get_hardware_version(void){
+char const *get_hardware_version(void)
+{
     return hw_ver_value;
 }
 
@@ -63,16 +71,19 @@ char const *get_hardware_version(void){
  *
  * @return software version
  */
-char const *get_software_version(void){
+char const *get_software_version(void)
+{
     return sw_ver_value;
 }
+
 /**
  * Calc software version's Integer value
  */
-void calc_software_version(void) {
+void calc_software_version(void)
+{
     char const *start_addr = NULL;
     char *match_addr = NULL;
-    char c_value[4] = { 0 };
+    char c_value[4] = {0};
     uint8_t c_length = 0, i = 0;
 
     start_addr = get_software_version();
@@ -89,13 +100,15 @@ void calc_software_version(void) {
     rt_memcpy(c_value, start_addr, c_length);
     software_version[i] = atoi(c_value);
 }
+
 /**
  * Calc hardware version's Integer value
  */
-void calc_hardware_version(void) {
+void calc_hardware_version(void)
+{
     char const *start_addr = NULL;
     char *match_addr = NULL;
-    char c_value[4] = { 0 };
+    char c_value[4] = {0};
     uint8_t c_length = 0, i = 0;
 
     start_addr = get_hardware_version();
@@ -112,19 +125,23 @@ void calc_hardware_version(void) {
     rt_memcpy(c_value, start_addr, c_length);
     hardware_version[i] = atoi(c_value);
 }
+
 /**
  * @param software version length
  *
  * @return  integer array of software version number pointer
  */
-uint8_t *get_sw_ver_value(void) {
+uint8_t *get_sw_ver_value(void)
+{
     return software_version;
 }
+
 /**
  * @param hardware version length
  *
  * @return  integer array of hardware version number pointer
  */
-uint8_t *get_hw_ver_value(void) {
+uint8_t *get_hw_ver_value(void)
+{
     return hardware_version;
 }

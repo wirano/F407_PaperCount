@@ -30,7 +30,7 @@
 /* board configuration */
 // <o> SDCard Driver <1=>SDIO sdcard <0=>SPI MMC card
 // 	<i>Default: 1
-#define STM32_USE_SDIO			0
+#define STM32_USE_SDIO            0
 
 #define Period_Tim4            8000
 
@@ -51,36 +51,36 @@
 #define STM32_SRAM_SIZE         128
 #define STM32_SRAM_END          (SRAM_BASE + STM32_SRAM_SIZE * 1024)
 
-#define USER_APP_ENTRY          (FLASH_BASE + 384 * 1024)  /* Ó¦ÓÃ³ÌÐòÈë¿ÚµØÖ·384KÎ»ÖÃ */
-#define BAK_SECTOIN_ADDR        (FLASH_BASE + 640 * 1024)  /* ±¸·ÝÇøÈë¿ÚµØÖ·  640KÎ»ÖÃ */
-//#define VECT_TAB_FLASH                                     /* ²ÉÓÃFlash´æ´¢ÏòÁ¿±í·½Ê½ */
-#define VECT_TAB_USER                                      /* ²ÉÓÃÓÃ»§×Ô¶¨ÒåÏòÁ¿±í·½Ê½ */
-#define USER_VECTOR_TABLE       USER_APP_ENTRY-NVIC_VectTab_FLASH /* ÓÃ»§×Ô¶¨ÒåÖÐ¶ÏÏòÁ¿±íÎ»ÖÃ */
+#define USER_APP_ENTRY          (FLASH_BASE + 384 * 1024)  /* Ó¦ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Ö·384KÎ»ï¿½ï¿½ */
+#define BAK_SECTOIN_ADDR        (FLASH_BASE + 640 * 1024)  /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Ö·  640KÎ»ï¿½ï¿½ */
+//#define VECT_TAB_FLASH                                     /* ï¿½ï¿½ï¿½ï¿½Flashï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ */
+#define VECT_TAB_USER                                      /* ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ */
+#define USER_VECTOR_TABLE       USER_APP_ENTRY-NVIC_VectTab_FLASH /* ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ */
 
 /* RT_USING_UART */
 #define RT_USING_UART1
 //#define RT_USING_REMAP_UART1
 #define RT_USING_UART2
-#define RT_UART_RX_BUFFER_SIZE	256
+#define RT_UART_RX_BUFFER_SIZE    256
 
 #define RT_USING_SPI1
 #define RT_USING_SPI3
 
 //#define LED_RUN_ON              GPIO_SetBits  (GPIOA,GPIO_Pin_9)  	   //RUN
 //#define LED_RUN_OFF             GPIO_ResetBits(GPIOA,GPIO_Pin_9) 	   //RUN
-#define LED_RUN_ON              GPIO_SetBits  (GPIOC,GPIO_Pin_7)  	   //RUN
-#define LED_RUN_OFF             GPIO_ResetBits(GPIOC,GPIO_Pin_7) 	   //RUN
+#define LED_RUN_ON              GPIO_SetBits  (GPIOC,GPIO_Pin_7)       //RUN
+#define LED_RUN_OFF             GPIO_ResetBits(GPIOC,GPIO_Pin_7)       //RUN
 
 /*********************************************************************************************************/
 /**                                                 MACRO'S												 */
 /***********************************************************************************************************/
 
 
-//Èí¡¢Ó²¼þ°æ±¾ºÅ¶¨Òå
-#define VERSION_SOFTWARE_MAJOR		1
-#define VERSION_SOFTWARE_MINOR		0
-#define VERSION_HARDWARE_MAJOR 		1
-#define VERSION_HARDWARE_MINOR 		0
+//ï¿½ï¿½Ó²ï¿½ï¿½ï¿½æ±¾ï¿½Å¶ï¿½ï¿½ï¿½
+#define VERSION_SOFTWARE_MAJOR        1
+#define VERSION_SOFTWARE_MINOR        0
+#define VERSION_HARDWARE_MAJOR        1
+#define VERSION_HARDWARE_MINOR        0
 
 /***********************************************************************************************************/
 /*                                               DATA TYPES												 */
@@ -103,7 +103,9 @@
 void BSP_Init(void);
 
 void rt_hw_board_init(void);
+
 void IWDG_Feed(void);
+
 void rt_hw_timer_handler(void);
 
 /*

@@ -1,7 +1,7 @@
 /*
  * user_finsh_cmd.c
  *
- *  Created on: 2013Äê12ÔÂ7ÈÕ
+ *  Created on: 2013ï¿½ï¿½12ï¿½ï¿½7ï¿½ï¿½
  *      Author: Armink
  */
 #include <rthw.h>
@@ -14,24 +14,34 @@
 #include <shell.h>
 #include <spi_flash.h>
 
-static void reboot(uint8_t argc, char **argv) {
+static void reboot(uint8_t argc, char **argv)
+{
     NVIC_SystemReset();
 }
-MSH_CMD_EXPORT(reboot, Reboot System);
 
-static void get_cpuusage(void) {
+MSH_CMD_EXPORT(reboot, Reboot
+System);
+
+static void get_cpuusage(void)
+{
     uint8_t cpu_usage_major, cpu_usage_minor;
 
     cpu_usage_get(&cpu_usage_major, &cpu_usage_minor);
     rt_kprintf("The CPU usage is %d.%d% now.\n", cpu_usage_major, cpu_usage_minor);
 }
-MSH_CMD_EXPORT(get_cpuusage, Get control board cpu usage);
 
-#define FILE_FLASH_ADDR                     0 /* ´«ÊäµÄ Flash Ä¿±êµØÖ· */
+MSH_CMD_EXPORT(get_cpuusage, Get
+control board
+cpu usage
+);
+
+#define FILE_FLASH_ADDR                     0 /* ï¿½ï¿½ï¿½ï¿½ï¿½ Flash Ä¿ï¿½ï¿½ï¿½Ö· */
 
 extern rt_spi_flash_device_t w25q128;
 static uint32_t ymodem_file_total_size, ymodem_file_cur_size;
-static enum rym_code ymodem_on_begin(struct rym_ctx *ctx, rt_uint8_t *buf, rt_size_t len) {
+
+static enum rym_code ymodem_on_begin(struct rym_ctx *ctx, rt_uint8_t *buf, rt_size_t len)
+{
     char *file_name, *file_size;
 
     /* calculate and store file size */
@@ -41,8 +51,8 @@ static enum rym_code ymodem_on_begin(struct rym_ctx *ctx, rt_uint8_t *buf, rt_si
     ymodem_file_cur_size = 0;
 
     /* erase flash */
-    if (sfud_erase((sfud_flash_t)(w25q128->user_data), FILE_FLASH_ADDR, ymodem_file_total_size)
-            != SFUD_SUCCESS) {
+    if (sfud_erase((sfud_flash_t) (w25q128->user_data), FILE_FLASH_ADDR, ymodem_file_total_size)
+        != SFUD_SUCCESS) {
         /* if erase fail then quit this session */
         return RYM_CODE_CAN;
     }
@@ -50,10 +60,11 @@ static enum rym_code ymodem_on_begin(struct rym_ctx *ctx, rt_uint8_t *buf, rt_si
     return RYM_CODE_ACK;
 }
 
-static enum rym_code ymodem_on_data(struct rym_ctx *ctx, rt_uint8_t *buf, rt_size_t len) {
+static enum rym_code ymodem_on_data(struct rym_ctx *ctx, rt_uint8_t *buf, rt_size_t len)
+{
     /* write file to flash */
-    if (sfud_write((sfud_flash_t)(w25q128->user_data), FILE_FLASH_ADDR + ymodem_file_cur_size, len, buf)
-            != SFUD_SUCCESS) {
+    if (sfud_write((sfud_flash_t) (w25q128->user_data), FILE_FLASH_ADDR + ymodem_file_cur_size, len, buf)
+        != SFUD_SUCCESS) {
         /* if write fail then quit this session */
         return RYM_CODE_CAN;
     }
@@ -61,14 +72,15 @@ static enum rym_code ymodem_on_data(struct rym_ctx *ctx, rt_uint8_t *buf, rt_siz
     return RYM_CODE_ACK;
 }
 
-static void ymodem(uint8_t argc, char **argv) {
+static void ymodem(uint8_t argc, char **argv)
+{
     struct rym_ctx rctx;
 
     rt_kprintf("Please select a file and use Ymodem to send.\r\n");
     /* close finsh echo */
     finsh_set_echo(false);
     if (!rym_recv_on_device(&rctx, rt_device_find(RT_CONSOLE_DEVICE_NAME), RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
-            ymodem_on_begin, ymodem_on_data, NULL, RT_TICK_PER_SECOND)) {
+                            ymodem_on_begin, ymodem_on_data, NULL, RT_TICK_PER_SECOND)) {
         /* wait some time for terminal response finish */
         rt_thread_delay(RT_TICK_PER_SECOND);
         rt_kprintf("Write file to flash success.\n");
@@ -80,4 +92,8 @@ static void ymodem(uint8_t argc, char **argv) {
     /* reopen finsh echo */
     finsh_set_echo(true);
 }
-MSH_CMD_EXPORT(ymodem, save file to flash by ymodem)
+
+MSH_CMD_EXPORT(ymodem, save
+file to
+flash by
+ymodem)

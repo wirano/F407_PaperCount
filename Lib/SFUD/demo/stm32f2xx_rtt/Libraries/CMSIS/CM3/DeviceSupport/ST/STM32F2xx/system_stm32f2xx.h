@@ -17,7 +17,7 @@
   *
   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************  
-  */ 
+  */
 
 /** @addtogroup CMSIS
   * @{
@@ -25,8 +25,8 @@
 
 /** @addtogroup stm32f2xx_system
   * @{
-  */  
-  
+  */
+
 /**
   * @brief Define to prevent recursive inclusion
   */
@@ -34,8 +34,8 @@
 #define __SYSTEM_STM32F2XX_H
 
 #ifdef __cplusplus
- extern "C" {
-#endif 
+extern "C" {
+#endif
 
 /** @addtogroup STM32F2xx_System_Includes
   * @{
@@ -76,8 +76,9 @@ extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Cloc
 /** @addtogroup STM32F2xx_System_Exported_Functions
   * @{
   */
-  
+
 extern void SystemInit(void);
+
 extern void SystemCoreClockUpdate(void);
 /**
   * @}
@@ -92,8 +93,8 @@ extern void SystemCoreClockUpdate(void);
 /**
   * @}
   */
-  
+
 /**
   * @}
-  */  
+  */
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

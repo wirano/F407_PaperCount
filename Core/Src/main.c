@@ -50,6 +50,8 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
+SPI_HandleTypeDef hspi1;
+
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 
@@ -257,21 +259,37 @@ const double b5 = 2.831e+06;
 const double c5 = 7.44e+05;
 
 //分段拟合31-60
-const double sa1 = 29.18;
-const double sb1 = 1.82e+06;
-const double sc1 = 9457;
-const double sa2 = 5.08;
-const double sb2 = 1.807e+06;
-const double sc2 = 5680;
-const double sa3 = 10.44;
-const double sb3 = 1.797e+06;
-const double sc3 = 1.517e+04;
-const double sa4 = -1.373;
-const double sb4 = 1.792e+06;
-const double sc4 = 3977;
-const double sa5 = 36.46;
-const double sb5 = 1.797e+06;
-const double sc5 = 1.013e+05;
+//const double sa1 = 29.18;
+//const double sb1 = 1.82e+06;
+//const double sc1 = 9457;
+//const double sa2 = 5.08;
+//const double sb2 = 1.807e+06;
+//const double sc2 = 5680;
+//const double sa3 = 10.44;
+//const double sb3 = 1.797e+06;
+//const double sc3 = 1.517e+04;
+//const double sa4 = -1.373;
+//const double sb4 = 1.792e+06;
+//const double sc4 = 3977;
+//const double sa5 = 36.46;
+//const double sb5 = 1.797e+06;
+//const double sc5 = 1.013e+05;
+
+const double sa1 = 39.0997499875822;
+const double sa2 = 4.54969891573061;
+const double sa3 = 17.4789905466391;
+const double sa4 = -1.29353078245377;
+const double sa5 = 33.2706648594671;
+const double sb1 = 1820348.28936334;
+const double sb2 = 1806697.33574431;
+const double sb3 = 1799434.67168167;
+const double sb4 = 1792137.08628014;
+const double sb5 = 1774328.67041329;
+const double sc1 = 10433.5475450764;
+const double sc2 = 5537.01382155798;
+const double sc3 = 18061.7881116977;
+const double sc4 = 3895.38922030636;
+const double sc5 = 66172.0785627557;
 
 
 double paper_fit;
@@ -287,7 +305,6 @@ uint8_t rsted = 0;
 uint64_t paper[200];
 
 uint8_t info = 0;
-uint8_t info = 1;
 
 FATFS fs;                 // Work area (file system object) for logical drive
 FIL file;                  // file objects
@@ -305,7 +322,11 @@ static void MX_TIM6_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+
 static void MX_SDIO_SD_Init(void);
+
+static void MX_SPI1_Init(void);
+
 /* USER CODE BEGIN PFP */
 void print_paper();
 
@@ -348,14 +369,14 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
@@ -367,34 +388,35 @@ int main(void)
     MX_USART3_UART_Init();
     MX_SDIO_SD_Init();
     MX_FATFS_Init();
+    MX_SPI1_Init();
     /* USER CODE BEGIN 2 */
     shell_control_init();
     HAL_TIM_Base_Start(&htim2);
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
-    if (BSP_SD_IsDetected() == SD_PRESENT) {
-        retSD = f_mount(&fs, "", 0);
-        if (retSD) {
-            logError("mount err:%d", retSD);
-        }
-    } else {
-        logError("NO SD Card plugged!");
-    }
-
-    retSD = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
-    if (retSD) {
-        logError("file open err:%d", retSD);
-    }
-    f_printf(&file, "cnt_raw,cnt_sum,max,min,cnt_int,paper_cnt\r\n");
-    retSD = f_close(&file);
-    if (retSD) {
-        logError("file close err:%d", retSD);
-    }
+//    if (BSP_SD_IsDetected() == SD_PRESENT) {
+//        retSD = f_mount(&fs, "", 0);
+//        if (retSD) {
+//            logError("mount err:%d", retSD);
+//        }
+//    } else {
+//        logError("NO SD Card plugged!");
+//    }
+//
+//    retSD = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+//    if (retSD) {
+//        logError("file open err:%d", retSD);
+//    }
+//    f_printf(&file, "cnt_raw,cnt_sum,max,min,cnt_int,paper_cnt\r\n");
+//    retSD = f_close(&file);
+//    if (retSD) {
+//        logError("file close err:%d", retSD);
+//    }
     /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
     while (1) {
@@ -403,19 +425,20 @@ int main(void)
 
         SendScreenPaperNum(paper_cnt);
         if (info) {
-            logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
+            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
+                    cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
-            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
-            if (retSD) {
-                logError("file open err:%d", retSD);
-            }
-            sprintf(str_buffer, "%ld,%lld,%ld,%ld,%ld,%d\r\n", cnt_raw, cnt_sum, max, min,
-                    int_cnt, ScreenCmd.CorrectNum);
-            f_printf(&file, "%s", str_buffer);
-            retSD = f_close(&file);
-            if (retSD) {
-                logError("file close err:%d", retSD);
-            }
+//            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+//            if (retSD) {
+//                logError("file open err:%d", retSD);
+//            }
+//            sprintf(str_buffer, "%ld,%lld,%ld,%ld,%ld,%d\r\n", cnt_raw, cnt_sum, max, min,
+//                    int_cnt, ScreenCmd.CorrectNum);
+//            f_printf(&file, "%s", str_buffer);
+//            retSD = f_close(&file);
+//            if (retSD) {
+//                logError("file close err:%d", retSD);
+//            }
         }
 
         SendScreenPaperNum(ScreenCmd.CorrectNum);
@@ -453,16 +476,6 @@ int main(void)
                 min = cnt_raw;
             }
         }
-
-        if (info) {
-            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
-                    cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
-                    int_cnt, ScreenCmd.CorrectNum);
-        }
-
-
-
-
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -545,6 +558,43 @@ static void MX_SDIO_SD_Init(void)
 }
 
 /**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+    /* USER CODE BEGIN SPI1_Init 0 */
+
+    /* USER CODE END SPI1_Init 0 */
+
+    /* USER CODE BEGIN SPI1_Init 1 */
+
+    /* USER CODE END SPI1_Init 1 */
+    /* SPI1 parameter configuration*/
+    hspi1.Instance = SPI1;
+    hspi1.Init.Mode = SPI_MODE_MASTER;
+    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+    hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    hspi1.Init.CRCPolynomial = 10;
+    if (HAL_SPI_Init(&hspi1) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN SPI1_Init 2 */
+
+    /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -552,7 +602,7 @@ static void MX_SDIO_SD_Init(void)
 static void MX_TIM2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+    /* USER CODE BEGIN TIM2_Init 0 */
 
   /* USER CODE END TIM2_Init 0 */
 
@@ -755,7 +805,7 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOF_CLK_ENABLE();
@@ -770,6 +820,9 @@ static void MX_GPIO_Init(void)
     HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
 
     /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
+
+    /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin : PF0 */
@@ -779,17 +832,18 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-    /*Configure GPIO pin : LED_Pin */
-    GPIO_InitStruct.Pin = LED_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
     /*Configure GPIO pin : PF10 */
     GPIO_InitStruct.Pin = GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : SPI1_NSS_Pin */
+    GPIO_InitStruct.Pin = SPI1_NSS_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(SPI1_NSS_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pin : LED_Pin */
     GPIO_InitStruct.Pin = LED_Pin;

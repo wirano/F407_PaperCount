@@ -35,23 +35,22 @@ rt_spi_flash_device_t w25q64, w25q128;
  *
  * @param parameter parameter
  */
-void thread_entry_sys_monitor(void* parameter)
+void thread_entry_sys_monitor(void *parameter)
 {
     extern void cpu_usage_get(rt_uint8_t *major, rt_uint8_t *minor);
-    while (1)
-    {
-        if(get_system_status() == SYSTEM_STATUS_RUN){
+    while (1) {
+        if (get_system_status() == SYSTEM_STATUS_RUN) {
             cpu_usage_get(&cpu_usage_major, &cpu_usage_minor);
             LED_RUN_ON;
             rt_thread_delay(DELAY_SYS_RUN_LED_ON);
             LED_RUN_OFF;
             rt_thread_delay(DELAY_SYS_RUN_LED_OFF);
-        } else if (get_system_status() == SYSTEM_STATUS_INIT){
+        } else if (get_system_status() == SYSTEM_STATUS_INIT) {
             LED_RUN_ON;
             rt_thread_delay(DELAY_SYS_INIT_LED_ON);
             LED_RUN_OFF;
             rt_thread_delay(DELAY_SYS_INIT_LED_OFF);
-        } else if (get_system_status() == SYSTEM_STATUS_FAULT){
+        } else if (get_system_status() == SYSTEM_STATUS_FAULT) {
             LED_RUN_ON;
             rt_thread_delay(DELAY_SYS_FAULT_LED_ON);
             LED_RUN_OFF;
@@ -67,7 +66,8 @@ void thread_entry_sys_monitor(void* parameter)
  *
  * @param parameter parameter
  */
-void sys_init_thread(void* parameter){
+void sys_init_thread(void *parameter)
+{
     set_system_status(SYSTEM_STATUS_INIT);
 
 #ifdef RT_USING_COMPONENTS_INIT
@@ -84,13 +84,12 @@ void sys_init_thread(void* parameter){
     /* SFUD initialize */
     w25q64 = rt_sfud_flash_probe("W25Q64", "spi10");
     w25q128 = rt_sfud_flash_probe("W25Q128", "spi30");
-    
+
     /* initialize OK and switch to running status */
     set_system_status(SYSTEM_STATUS_RUN);
 
     rt_thread_delete(rt_thread_self());
 }
-
 
 
 int rt_application_init(void)
@@ -105,7 +104,7 @@ int rt_application_init(void)
                    THREAD_SYS_MONITOR_PRIO, 5);
     rt_thread_startup(&thread_sys_monitor);
 
-    init_thread = rt_thread_create("sys init", sys_init_thread,NULL, 2048, 10, 10);
+    init_thread = rt_thread_create("sys init", sys_init_thread, NULL, 2048, 10, 10);
     if (init_thread != NULL) {
         rt_thread_startup(init_thread);
     }

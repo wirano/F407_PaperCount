@@ -25,7 +25,7 @@
 struct stm32_spi_bus
 {
     struct rt_spi_bus parent;
-    SPI_TypeDef * SPI;
+    SPI_TypeDef *SPI;
 #ifdef SPI_USING_DMA
     DMA_Stream_TypeDef * DMA_Stream_TX;
     uint32_t DMA_Channel_TX;
@@ -40,14 +40,14 @@ struct stm32_spi_bus
 
 struct stm32_spi_cs
 {
-    GPIO_TypeDef * GPIOx;
+    GPIO_TypeDef *GPIOx;
     uint16_t GPIO_Pin;
 };
 
 /* public function */
-rt_err_t stm32_spi_register(SPI_TypeDef * SPI,
-                            struct stm32_spi_bus * stm32_spi,
-                            const char * spi_bus_name);
+rt_err_t stm32_spi_register(SPI_TypeDef *SPI,
+                            struct stm32_spi_bus *stm32_spi,
+                            const char *spi_bus_name);
 
 #endif // STM32F20X_40X_SPI_H_INCLUDED
 

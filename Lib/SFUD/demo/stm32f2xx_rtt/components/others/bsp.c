@@ -33,7 +33,7 @@
 *                                       LOCAL GLOBAL VARIABLES
 *********************************************************************************************************
 */
-uint16_t ADC1ConvertedValue[12];//µ¥´ÎAD×ª»»Öµ
+uint16_t ADC1ConvertedValue[12];//ï¿½ï¿½ï¿½ï¿½AD×ªï¿½ï¿½Öµ
 /*
 *********************************************************************************************************
 *                                      LOCAL FUNCTION PROTOTYPES
@@ -43,47 +43,47 @@ uint16_t ADC1ConvertedValue[12];//µ¥´ÎAD×ª»»Öµ
 /** This function will initial STM32 board**/
 void rt_hw_board_init()
 {
-	BSP_Init();
-	rt_components_board_init();
-	rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
+    BSP_Init();
+    rt_components_board_init();
+    rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
 }
 
-//******************************Ê±ÖÓÅäÖÃº¯Êý***************************************
-//º¯Êý¶¨Òå: static void RCC_Configuration(void)
-//º¯Êý¹¦ÄÜ£ºÅäÖÃËùÓÐ¹¦ÄÜÄ£¿éµÄÊ±ÖÓ
-//Èë¿Ú²ÎÊý£ºÎÞ
-//³ö¿Ú²ÎÊý£ºÎÞ
-//±¸    ×¢£ºEditor£ºZuohao 2013-08-29    Company: BXXJS
+//******************************Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½***************************************
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: static void RCC_Configuration(void)
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½    ×¢ï¿½ï¿½Editorï¿½ï¿½Zuohao 2013-08-29    Company: BXXJS
 //**********************************************************************
 static void RCC_Configuration(void)
 {
     RCC_ClocksTypeDef rcc_clocks;
 
-	RCC_GetClocksFreq(&rcc_clocks);
-	/* È·¶¨¾§ÕñÍêÈ«ÆðÕñ */
-	RT_ASSERT(rcc_clocks.HCLK_Frequency == 120000000);
+    RCC_GetClocksFreq(&rcc_clocks);
+    /* È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ */
+    RT_ASSERT(rcc_clocks.HCLK_Frequency == 120000000);
 
-	//ÏÂÃæÊÇ¸ø¸÷Ä£¿é¿ªÆôÊ±ÖÓ
-    //Æô¶¯GPIO
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½Ä£ï¿½é¿ªï¿½ï¿½Ê±ï¿½ï¿½
+    //ï¿½ï¿½ï¿½ï¿½GPIO
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | \
                            RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | \
                            RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOG,
                            ENABLE);
 
-	//Æô¶¯USART1Ê±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	//Æô¶¯USART2Ê±ÖÓ
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-	/* Enable WWDG clock */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+    //ï¿½ï¿½ï¿½ï¿½USART1Ê±ï¿½ï¿½
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    //ï¿½ï¿½ï¿½ï¿½USART2Ê±ï¿½ï¿½
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    /* Enable WWDG clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
 }
 
-//********************************NVICÅäÖÃº¯Êý***************************************
-//º¯Êý¶¨Òå: void NVIC_Configuration(void)
-//º¯Êý¹¦ÄÜ£ºNVIC²ÎÊýÅäÖÃ
-//Èë¿Ú²ÎÊý£ºÎÞ
-//³ö¿Ú²ÎÊý£ºÎÞ
-//±¸    ×¢£ºEditor£ºZuohao 2013-08-29    Company: BXXJS
+//********************************NVICï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½***************************************
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: void NVIC_Configuration(void)
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½NVICï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½    ×¢ï¿½ï¿½Editorï¿½ï¿½Zuohao 2013-08-29    Company: BXXJS
 //**********************************************************************************
 static void NVIC_Configuration(void)
 {
@@ -100,22 +100,23 @@ static void NVIC_Configuration(void)
     NVIC_SetVectorTable(NVIC_VectTab_FLASH, USER_VECTOR_TABLE);
 #endif
 
-	//ÉèÖÃNVICÓÅÏÈ¼¶·Ö×éÎªGroup2£º0-3ÇÀÕ¼Ê½ÓÅÏÈ¼¶£¬0-3µÄÏìÓ¦Ê½ÓÅÏÈ¼¶
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    //ï¿½ï¿½ï¿½ï¿½NVICï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½ÎªGroup2ï¿½ï¿½0-3ï¿½ï¿½Õ¼Ê½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½0-3ï¿½ï¿½ï¿½ï¿½Ó¦Ê½ï¿½ï¿½ï¿½È¼ï¿½
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-	//´°¿Ú¿´ÃÅ¹·ÖÐ¶ÏÅäÖÃ
-	NVIC_InitStructure.NVIC_IRQChannel = WWDG_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    //ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½Å¹ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½
+    NVIC_InitStructure.NVIC_IRQChannel = WWDG_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
-//******************************GPIOÅäÖÃº¯Êý***************************************
-//º¯Êý¶¨Òå: static void GPIO_Configuration(void)
-//º¯Êý¹¦ÄÜ£ºÅäÖÃËùÓÐGPIOÒý½Å¹¦ÄÜ
-//Èë¿Ú²ÎÊý£ºÎÞ
-//³ö¿Ú²ÎÊý£ºÎÞ
-//±¸    ×¢£ºEditor£ºZuohao 2013-08-29    Company: BXXJS
+
+//******************************GPIOï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½***************************************
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: static void GPIO_Configuration(void)
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½GPIOï¿½ï¿½ï¿½Å¹ï¿½ï¿½ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½    ×¢ï¿½ï¿½Editorï¿½ï¿½Zuohao 2013-08-29    Company: BXXJS
 //**********************************************************************
 static void GPIO_Configuration(void)
 {
@@ -137,7 +138,7 @@ static void GPIO_Configuration(void)
     GPIO_Init(GPIOF, &GPIO_InitStructure);
     GPIO_Init(GPIOG, &GPIO_InitStructure);
 
-    /******************ÏµÍ³ÔËÐÐLEDÖ¸Ê¾µÆÅäÖÃ*******************/
+    /******************ÏµÍ³ï¿½ï¿½ï¿½ï¿½LEDÖ¸Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*******************/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -146,33 +147,34 @@ static void GPIO_Configuration(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-//*******************³õÊ¼»¯¶ÀÁ¢¿´ÃÅ¹·*************************************
-//º¯Êý¶¨Òå: void IWDG_Configuration(void) 
-//Ãè    Êö£º³õÊ¼»¯¶ÀÁ¢¿´ÃÅ¹·
-//Èë¿Ú²ÎÊý£ºÎÞ
-//³ö¿Ú²ÎÊý£ºÎÞ
-//±¸    ×¢£º·ÖÆµÒò×Ó=4*2^prer.µ«×î´óÖµÖ»ÄÜÊÇ256!Ê±¼ä¼ÆËã(´ó¸Å):Tout=40K/((4*2^prer)*rlr)Öµ	 3S³¬Ê±
-//Editor£ºliuqh 2013-1-16  Company: BXXJS
+//*******************ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½*************************************
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: void IWDG_Configuration(void) 
+//ï¿½ï¿½    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½    ×¢ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½=4*2^prer.ï¿½ï¿½ï¿½ï¿½ï¿½ÖµÖ»ï¿½ï¿½ï¿½ï¿½256!Ê±ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½):Tout=40K/((4*2^prer)*rlr)Öµ	 3Sï¿½ï¿½Ê±
+//Editorï¿½ï¿½liuqh 2013-1-16  Company: BXXJS
 //*******************************************************************
-static void IWDG_Configuration(void) 
+static void IWDG_Configuration(void)
 {
-	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);//Ê¹ÄÜ¶ÔIWDG->PRºÍIWDG->RLRµÄÐ´
-	IWDG_SetPrescaler(IWDG_Prescaler_64);//64·ÖÆµ
-	IWDG_SetReload(1875);
-	IWDG_ReloadCounter();
-	IWDG_Enable();
+    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);//Ê¹ï¿½Ü¶ï¿½IWDG->PRï¿½ï¿½IWDG->RLRï¿½ï¿½Ð´
+    IWDG_SetPrescaler(IWDG_Prescaler_64);//64ï¿½ï¿½Æµ
+    IWDG_SetReload(1875);
+    IWDG_ReloadCounter();
+    IWDG_Enable();
 }
-//*******************Î¹¶ÀÁ¢¿´ÃÅ¹·*************************************
-//º¯Êý¶¨Òå: void IWDG_Feed(void)
-//Ãè    Êö£º³õÊ¼»¯¶ÀÁ¢¿´ÃÅ¹·
-//Èë¿Ú²ÎÊý£ºÎÞ
-//³ö¿Ú²ÎÊý£ºprer:·ÖÆµÊý:0~7(Ö»ÓÐµÍ3Î»ÓÐÐ§!)£¬rlr:ÖØ×°ÔØ¼Ä´æÆ÷Öµ:µÍ11Î»ÓÐÐ§.
-//±¸    ×¢£º·ÖÆµÒò×Ó=4*2^prer.µ«×î´óÖµÖ»ÄÜÊÇ256!Ê±¼ä¼ÆËã(´ó¸Å):Tout=40K/((4*2^prer)*rlr)Öµ
-//Editor£ºliuqh 2013-1-16  Company: BXXJS
+
+//*******************Î¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½*************************************
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: void IWDG_Feed(void)
+//ï¿½ï¿½    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½prer:ï¿½ï¿½Æµï¿½ï¿½:0~7(Ö»ï¿½Ðµï¿½3Î»ï¿½ï¿½Ð§!)ï¿½ï¿½rlr:ï¿½ï¿½×°ï¿½Ø¼Ä´ï¿½ï¿½ï¿½Öµ:ï¿½ï¿½11Î»ï¿½ï¿½Ð§.
+//ï¿½ï¿½    ×¢ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½=4*2^prer.ï¿½ï¿½ï¿½ï¿½ï¿½ÖµÖ»ï¿½ï¿½ï¿½ï¿½256!Ê±ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½):Tout=40K/((4*2^prer)*rlr)Öµ
+//Editorï¿½ï¿½liuqh 2013-1-16  Company: BXXJS
 //*******************************************************************
 void IWDG_Feed(void)
 {
-	IWDG_ReloadCounter();//reload
+    IWDG_ReloadCounter();//reload
 }
 
 
@@ -183,18 +185,19 @@ void IWDG_Feed(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
-void  SysTick_Configuration(void)
+void SysTick_Configuration(void)
 {
-	RCC_ClocksTypeDef  rcc_clocks;
-	rt_uint32_t         cnts;
+    RCC_ClocksTypeDef rcc_clocks;
+    rt_uint32_t cnts;
 
-	RCC_GetClocksFreq(&rcc_clocks);
+    RCC_GetClocksFreq(&rcc_clocks);
 
-	cnts = (rt_uint32_t)rcc_clocks.HCLK_Frequency / RT_TICK_PER_SECOND;
+    cnts = (rt_uint32_t) rcc_clocks.HCLK_Frequency / RT_TICK_PER_SECOND;
 
-	SysTick_Config(cnts);
-	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
+    SysTick_Config(cnts);
+    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
 }
+
 /**
  * This is the timer interrupt service routine.
  *
@@ -210,14 +213,14 @@ void rt_hw_timer_handler(void)
     rt_interrupt_leave();
 }
 
-void assert_failed(u8* file, u32 line)
+void assert_failed(u8 *file, u32 line)
 {
-	/* User can add his own implementation to report the file name and line number,
-	 ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	/* Infinite loop */
-	rt_kprintf("assert failed at %s:%d \n", file, line);
-	while (1) {
-	}
+    /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* Infinite loop */
+    rt_kprintf("assert failed at %s:%d \n", file, line);
+    while (1) {
+    }
 }
 /*
 *********************************************************************************************************
@@ -242,13 +245,13 @@ void assert_failed(u8* file, u32 line)
 *********************************************************************************************************
 */
 
-void  BSP_Init (void)
+void BSP_Init(void)
 {
-	RCC_Configuration();
-	NVIC_Configuration();
-	SysTick_Configuration();
-	GPIO_Configuration();
-//	TODO  ·½±ãµ÷ÊÔ£¬ÔÝÊ±×¢ÊÍ¿´ÃÅ¹·£¬ÕýÊ½·¢²¼Ê±ÐèÒª´ò¿ª
+    RCC_Configuration();
+    NVIC_Configuration();
+    SysTick_Configuration();
+    GPIO_Configuration();
+//	TODO  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½Ê±×¢ï¿½Í¿ï¿½ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Òªï¿½ï¿½
 // 	IWDG_Configuration();
 }
 

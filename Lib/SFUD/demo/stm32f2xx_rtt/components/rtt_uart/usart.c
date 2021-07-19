@@ -63,7 +63,7 @@ static rt_err_t stm32_configure(struct rt_serial_device *serial, struct serial_c
     RT_ASSERT(serial != RT_NULL);
     RT_ASSERT(cfg != RT_NULL);
 
-    uart = (struct stm32_uart *)serial->parent.user_data;
+    uart = (struct stm32_uart *) serial->parent.user_data;
 
     if (cfg->baud_rate == BAUD_RATE_9600)
         USART_InitStructure.USART_BaudRate = 9600;
@@ -94,22 +94,21 @@ static rt_err_t stm32_control(struct rt_serial_device *serial, int cmd, void *ar
     struct stm32_uart *uart;
 
     RT_ASSERT(serial != RT_NULL);
-    uart = (struct stm32_uart *)serial->parent.user_data;
+    uart = (struct stm32_uart *) serial->parent.user_data;
 
-    switch (cmd)
-    {
-    case RT_DEVICE_CTRL_CLR_INT:
-        /* disable rx irq */
-        UART_DISABLE_IRQ(uart->irq);
-        /* disable interrupt */
-        USART_ITConfig(uart->uart_device, USART_IT_RXNE, DISABLE);
-        break;
-    case RT_DEVICE_CTRL_SET_INT:
-        /* enable rx irq */
-        UART_ENABLE_IRQ(uart->irq);
-        /* enable interrupt */
-        USART_ITConfig(uart->uart_device, USART_IT_RXNE, ENABLE);
-        break;
+    switch (cmd) {
+        case RT_DEVICE_CTRL_CLR_INT:
+            /* disable rx irq */
+            UART_DISABLE_IRQ(uart->irq);
+            /* disable interrupt */
+            USART_ITConfig(uart->uart_device, USART_IT_RXNE, DISABLE);
+            break;
+        case RT_DEVICE_CTRL_SET_INT:
+            /* enable rx irq */
+            UART_ENABLE_IRQ(uart->irq);
+            /* enable interrupt */
+            USART_ITConfig(uart->uart_device, USART_IT_RXNE, ENABLE);
+            break;
     }
 
     return RT_EOK;
@@ -120,7 +119,7 @@ static int stm32_putc(struct rt_serial_device *serial, char c)
     struct stm32_uart *uart;
 
     RT_ASSERT(serial != RT_NULL);
-    uart = (struct stm32_uart *)serial->parent.user_data;
+    uart = (struct stm32_uart *) serial->parent.user_data;
 
     while (!(uart->uart_device->SR & USART_FLAG_TXE));
     uart->uart_device->DR = c;
@@ -134,11 +133,10 @@ static int stm32_getc(struct rt_serial_device *serial)
     struct stm32_uart *uart;
 
     RT_ASSERT(serial != RT_NULL);
-    uart = (struct stm32_uart *)serial->parent.user_data;
+    uart = (struct stm32_uart *) serial->parent.user_data;
 
     ch = -1;
-    if (uart->uart_device->SR & USART_FLAG_RXNE)
-    {
+    if (uart->uart_device->SR & USART_FLAG_RXNE) {
         ch = uart->uart_device->DR & 0xff;
     }
 
@@ -146,12 +144,12 @@ static int stm32_getc(struct rt_serial_device *serial)
 }
 
 static const struct rt_uart_ops stm32_uart_ops =
-{
-    stm32_configure,
-    stm32_control,
-    stm32_putc,
-    stm32_getc,
-};
+        {
+                stm32_configure,
+                stm32_control,
+                stm32_putc,
+                stm32_getc,
+        };
 
 #if defined(RT_USING_UART1)
 /* UART1 device driver structure */
@@ -277,9 +275,9 @@ static void GPIO_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 
 #ifdef RT_USING_UART1
@@ -379,4 +377,5 @@ int rt_hw_usart_init(void)
 #endif /* RT_USING_UART3 */
     return 0;
 }
+
 INIT_BOARD_EXPORT(rt_hw_usart_init);
