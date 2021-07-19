@@ -46,7 +46,7 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include
+include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include FATFS/Target FATFS/App Middlewares/Third_Party/FatFs/src
                     Lib/letter-shell/src
                     Lib/letter-shell/extensions/log
                     Lib/UsartScreen
@@ -54,7 +54,7 @@ include_directories(Core/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32F407xx)
 
-file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*"
+file(GLOB_RECURSE SOURCES "Middlewares/*.*" "FATFS/*.*" "startup/*.*" "Drivers/*.*" "Core/*.*"
      "Lib/letter-shell/src/*.c"
      "Lib/letter-shell/extensions/log/*.c"
      "Lib/UsartScreen/*.c"
