@@ -16,6 +16,7 @@ typedef struct
     uint8_t Finish;           //完成测量命令
     uint8_t Stop;             //中止测量命令
     uint8_t Correct;          //校准指令
+    uint8_t Correct_apply;    //校准完成计算数据
 }ScreenCmdSt;
 
 void UsartScreenReceive(uint8_t data);                          //接收串口屏发送到单片机的数据
