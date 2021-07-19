@@ -44,6 +44,6 @@ enum {
     [SFUD_XXXX_DEVICE_INDEX] = {.name = "XXXX", .spi.name = "SPIX"},           \
 }
 
-#define SFUD_USING_QSPI
+//#define SFUD_USING_QSPI
 
 #endif /* _SFUD_CFG_H_ */

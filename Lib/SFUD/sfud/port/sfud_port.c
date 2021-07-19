@@ -75,22 +75,22 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
         }
         /* 发送数据 */
         retry_times = 1000;
-        while (SPI_I2S_GetFlagStatus(spi_dev->spix, SPI_I2S_FLAG_TXE) == RESET) {
+        while (__HAL_SPI_GET_FLAG(spi_dev->spix, SPI_FLAG_TXE) == RESET) {
             SFUD_RETRY_PROCESS(NULL, retry_times, result);
         }
         if (result != SFUD_SUCCESS) {
             goto exit;
         }
-        HAL_SPI_Transmit(spi_dev->spix, send_data,1,1000);
+        spi_dev->spix->Instance->DR = send_data;
         /* 接收数据 */
         retry_times = 1000;
-        while (SPI_I2S_GetFlagStatus(spi_dev->spix, SPI_I2S_FLAG_RXNE) == RESET) {
+        while (__HAL_SPI_GET_FLAG(spi_dev->spix, SPI_FLAG_RXNE) == RESET) {
             SFUD_RETRY_PROCESS(NULL, retry_times, result);
         }
         if (result != SFUD_SUCCESS) {
             goto exit;
         }
-        read_data = SPI_I2S_ReceiveData(spi_dev->spix);
+        read_data = spi_dev->spix->Instance->DR;
         /* 写缓冲区中的数据发完后，再读取 SPI 总线中的数据到读缓冲区 */
         if (i >= write_size) {
             *read_buf++ = read_data;
