@@ -73,23 +73,14 @@ uint8_t filename[] = "paper.csv";
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
 static void MX_GPIO_Init(void);
-
 static void MX_DMA_Init(void);
-
 static void MX_TIM2_Init(void);
-
 static void MX_TIM6_Init(void);
-
 static void MX_USART1_UART_Init(void);
-
 static void MX_USART2_UART_Init(void);
-
 static void MX_USART3_UART_Init(void);
-
 static void MX_SDIO_SD_Init(void);
-
 /* USER CODE BEGIN PFP */
 void print_paper();
 
@@ -122,6 +113,7 @@ int main(void)
     uint32_t max = 0;
     uint32_t min = 0xffffffff;
     uint8_t rsted = 0;
+    TCHAR str_buffer[256];
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -165,11 +157,11 @@ int main(void)
         logError("NO SD Card plugged!");
     }
 
-    retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE);
+    retSD = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
     if (retSD) {
         logError("file open err:%d", retSD);
     }
-    f_printf(&file, "cnt_raw cnt_sum max min cnt_int paper_cnt\r\n");
+    f_printf(&file, "cnt_raw,cnt_sum,max,min,cnt_int,paper_cnt\r\n");
     retSD = f_close(&file);
     if (retSD) {
         logError("file close err:%d", retSD);
@@ -195,12 +187,13 @@ int main(void)
         if (info) {
             logInfo("cnt_raw:%ld cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n", cnt_raw, cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
-            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE);
+            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
             if (retSD) {
                 logError("file open err:%d", retSD);
             }
-            f_printf(&file, "%ld %ld %ld %ld %ld %d\r\n", cnt_raw, cnt_sum, max, min,
-                     int_cnt, ScreenCmd.CorrectNum);
+            sprintf(str_buffer, "%ld,%lld,%ld,%ld,%ld,%d\r\n", cnt_raw, cnt_sum, max, min,
+                    int_cnt, ScreenCmd.CorrectNum);
+            f_printf(&file, "%s", str_buffer);
             retSD = f_close(&file);
             if (retSD) {
                 logError("file close err:%d", retSD);
