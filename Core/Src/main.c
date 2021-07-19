@@ -33,7 +33,12 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct
+{
+    double cali_k;  // cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
+    double cali_b;  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
+    uint32_t freq_divide;
+} cali_data;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -314,7 +319,7 @@ uint32_t cnt_raw;
 uint64_t cnt_sum;
 uint32_t int_cnt;
 uint8_t sample_cnt;
-double sample_data[3];
+double multi_paper_fit[3];
 uint8_t rsted = 0;
 
 uint64_t paper[200];
@@ -322,11 +327,73 @@ uint64_t paper[200];
 uint8_t info = 0;
 
 // 校准
-uint32_t freq_orig[10] = {0, 0, 0, 1, 1}; // 0->1 1->10 2->20 ...
-uint32_t freq_cali[10];
-double cali_k[9];  // 0->(0-10] 1->[10-20] 2->[20-30] cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
-double cali_b[9];  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
-double cali_freq_delta[9]; // cali_freq_delta = cali_k * freq_raw + cali_b
+uint32_t freq_orig[100] = {
+        0,
+        1130436,
+        1203761,
+        1280964,
+        1376459,
+        1436646,
+        1461632,
+        1493506,
+        1524845,
+        1543454,
+        1572750,
+        1586142,
+        1604331,
+        1618982,
+        1636608,
+        1648941,
+        1659722,
+        1668247,
+        1679421,
+        1687745,
+        1695570,
+        1704013,
+        1710613,
+        1717419,
+        1724690,
+        1733806,
+        1736905,
+        1740400,
+        1744747,
+        1748169,
+        1753083,
+        1756396,
+        1761100,
+        1763812,
+        1768803,
+        1772660,
+        1774881,
+        1776451,
+        1779230,
+        1780875,
+        1782585,
+        1783962,
+        1785697,
+        1787465,
+        1790944,
+        1792859,
+        1795267,
+        1796747,
+        1800082,
+        1801164,
+        1802787,
+        1804200,
+        1805721,
+        1806551,
+        1808710,
+        1809772,
+        1811446,
+        1812691,
+        1814181,
+        1815000,
+        1815793,
+};
+uint32_t freq_cali[100];
+cali_data cali[100];
+uint8_t cali_cnt;
+double cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
 double freq_calied; // = freq_raw + cali_freq_delta
 
 FATFS fs;                 // Work area (file system object) for logical drive
@@ -388,6 +455,9 @@ int main(void)
     uint32_t min = 0xffffffff;
     uint8_t rsted = 0;
     TCHAR str_buffer[256];
+
+    uint8_t freq_prev_p;
+    uint8_t cali_line_cnt;
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -453,7 +523,7 @@ int main(void)
         SendScreenPaperNum(paper_cnt);
         if (info) {
             logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
-                    cnt_raw, sample_data[0], sample_data[1], sample_data[2], cnt_sum, max, min,
+                    cnt_raw, multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2], cnt_sum, max, min,
                     int_cnt, ScreenCmd.CorrectNum);
 
 //            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
@@ -518,22 +588,35 @@ int main(void)
         }
         //计算校准公式
         if (ScreenCmd.Correct_apply) {
-            for (int i = 0; i < 9; ++i) {
-                if (freq_cali[i] != 0 && freq_cali[i + 1] != 0) {
-                    cali_k[i] = ((freq_orig[i + 1] - freq_cali[i + 1]) - (freq_orig[i] - freq_cali[i])) /
-                                (double) (freq_cali[i + 1] - freq_cali[i]);
-                    cali_b[i] = freq_orig[i] - cali_k[i] * freq_cali[i];
+            cali_cnt = 0;
+            for (int i = 0; i < 100; ++i) {
+                if (freq_cali[i] != 0) {
+                    if (freq_prev_p != 0) {
+                        cali[cali_cnt].cali_k =
+                                ((freq_orig[i] - freq_cali[i]) - (freq_orig[freq_prev_p] - freq_cali[freq_prev_p])) /
+                                (double) (freq_cali[i] - freq_cali[freq_prev_p]);
+                        cali[cali_cnt].cali_b = freq_orig[i] - freq_cali[i] - cali[cali_cnt].cali_k * freq_cali[i];
+                        cali[cali_cnt].freq_divide = freq_cali[i];
+                        freq_prev_p = i;
+                        cali_cnt++;
+                    } else {
+                        cali[cali_cnt].cali_k = 0;
+                        cali[cali_cnt].cali_b = 0;
+                        cali[cali_cnt].freq_divide = freq_cali[i];
+                        freq_prev_p = i;
+                        cali_cnt++;
+                    }
                 }
             }
         }
 
-        /* USER CODE END WHILE */
+/* USER CODE END WHILE */
 
-        /* USER CODE BEGIN 3 */
+/* USER CODE BEGIN 3 */
     }
 
 #pragma clang diagnostic pop
-    /* USER CODE END 3 */
+/* USER CODE END 3 */
 }
 
 /**
@@ -859,26 +942,27 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    static uint8_t p_start = 0, p_end = 21;
     static uint32_t p = 0;
     static uint32_t cnt;
     static uint32_t tmp[22];
     static uint32_t tmp_next[2];
     uint32_t ex_tmp;
 
+    cali_data cali_used;
+
     cnt_raw = TIM2->CNT;
     TIM2->CNT = 0;
     cnt = cnt_raw;
+
     int_cnt++;
-    if (int_cnt > 50 && int_cnt <= 72) {
-        tmp[int_cnt - 51] = cnt;
+    if (int_cnt < 22) {
+        tmp[int_cnt] = cnt;
     }
 
-    if (int_cnt >= 73) {
+    if (int_cnt >= 22) {
+
         tmp_next[p++] = cnt;
-    }
 
-    if (int_cnt >= 72) {
         if (p == 2) {
             p = 0;
             tmp[0] = tmp_next[0];
@@ -903,7 +987,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #ifndef SAMPLING
     if (int_cnt == 100 && sample_cnt < 3) {
         int_cnt = 0;
-        if (cnt_sum < 1755000) {
+
+        cali_used.cali_k = 0;
+        cali_used.cali_b = 0;
+        cali_used.freq_divide = 0;
+        for (int i = 0; i < cali_cnt; ++i) {
+            if (cnt_sum < cali[i].freq_divide) {
+                cali_used = cali[i];
+                break;
+            }
+        }
+
+        cali_freq_delta = cali_used.cali_k * cnt_sum + cali_used.cali_b;
+        freq_calied = cnt_sum + cali_freq_delta;
+
+        if (cnt_sum < (freq_cali[30] == 0 ? freq_orig[30] : freq_cali[30])) {
             //0-30
 
 //        paper_fit = a * exp(b * cnt_sum) + c * exp(d * cnt_sum);
@@ -918,9 +1016,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2));
             // 5阶高斯
-            paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
-                        a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
-                        a5 * exp(-pow(((cnt_sum - b5) / c5), 2));
+            paper_fit = a1 * exp(-pow(((freq_calied - b1) / c1), 2)) + a2 * exp(-pow(((freq_calied - b2) / c2), 2)) +
+                        a3 * exp(-pow(((freq_calied - b3) / c3), 2)) + a4 * exp(-pow(((freq_calied - b4) / c4), 2)) +
+                        a5 * exp(-pow(((freq_calied - b5) / c5), 2));
             // 8阶高斯
 //        paper_fit = a1 * exp(-pow(((cnt_sum - b1) / c1), 2)) + a2 * exp(-pow(((cnt_sum - b2) / c2), 2)) +
 //                    a3 * exp(-pow(((cnt_sum - b3) / c3), 2)) + a4 * exp(-pow(((cnt_sum - b4) / c4), 2)) +
@@ -932,22 +1030,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             //31-60
 
             // 5阶高斯
-            paper_fit = sa1 * exp(-pow(((cnt_sum - sb1) / sc1), 2)) + sa2 * exp(-pow(((cnt_sum - sb2) / sc2), 2)) +
-                        sa3 * exp(-pow(((cnt_sum - sb3) / sc3), 2)) + sa4 * exp(-pow(((cnt_sum - sb4) / sc4), 2)) +
-                        sa5 * exp(-pow(((cnt_sum - sb5) / sc5), 2));
+            paper_fit =
+                    sa1 * exp(-pow(((freq_calied - sb1) / sc1), 2)) + sa2 * exp(-pow(((freq_calied - sb2) / sc2), 2)) +
+                    sa3 * exp(-pow(((freq_calied - sb3) / sc3), 2)) + sa4 * exp(-pow(((freq_calied - sb4) / sc4), 2)) +
+                    sa5 * exp(-pow(((freq_calied - sb5) / sc5), 2));
         }
-        sample_data[sample_cnt++] = paper_fit;
+        multi_paper_fit[sample_cnt++] = paper_fit;
     }
 
     if (sample_cnt == 3) {
-        logDebug("%.2lf %.2lf %.2lf", sample_data[0], sample_data[1], sample_data[2]);
-        if (round(sample_data[0]) == round(sample_data[1]) &&
-            round(sample_data[0]) == round(sample_data[2]) &&
-            round(sample_data[1]) == round(sample_data[2])) {
+        logDebug("%.2lf %.2lf %.2lf", multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2]);
+        if (round(multi_paper_fit[0]) == round(multi_paper_fit[1]) &&
+            round(multi_paper_fit[0]) == round(multi_paper_fit[2]) &&
+            round(multi_paper_fit[1]) == round(multi_paper_fit[2])) {
             rsted = 0;
             ScreenCmd.Start = 0;
             sample_cnt = 0;
-            paper_cnt = (uint16_t) round(sample_data[0]);
+            paper_cnt = (uint16_t) round(multi_paper_fit[0]);
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             info = 0;
             freq_raw = cnt_sum;
