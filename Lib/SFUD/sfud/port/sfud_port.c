@@ -132,9 +132,10 @@ static void spi_unlock(const sfud_spi *spi)
     __enable_irq();
 }
 
-static void retry_delay_1ms(void)
+static void retry_delay_100us(void)
 {
-    HAL_Delay(1);
+    uint32_t delay = 16800;
+    while (delay--);
 }
 
 extern SPI_HandleTypeDef hspi1;
@@ -168,9 +169,9 @@ sfud_err sfud_spi_port_init(sfud_flash *flash)
             flash->spi.unlock = spi_unlock;
             flash->spi.user_data = &spi1;
             /* about 100 microsecond delay */
-            flash->retry.delay = retry_delay_1ms;
+            flash->retry.delay = retry_delay_100us;
             /* adout 10 seconds timeout */
-            flash->retry.times = 10 * 1000;
+            flash->retry.times = 10 * 100;
 
             break;
         }

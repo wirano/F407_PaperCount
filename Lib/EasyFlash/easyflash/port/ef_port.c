@@ -36,7 +36,7 @@ static uint8_t log_buf[128];
 
 /* default environment variables set for user */
 static const ef_env default_env_set[] = {
-
+        {"name", "paper count", 0}
 };
 
 /**
