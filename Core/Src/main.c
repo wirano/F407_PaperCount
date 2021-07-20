@@ -35,8 +35,8 @@
 /* USER CODE BEGIN PTD */
 typedef struct
 {
-    double cali_k;  // cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
-    double cali_b;  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
+    float cali_k;  // cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
+    float cali_b;  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
     uint32_t freq_divide;
 } cali_data;
 /* USER CODE END PTD */
@@ -245,21 +245,37 @@ UART_HandleTypeDef huart3;
 //const double b5 = 7.178e+06;
 //const double c5 = 1.46e+06;
 
-const double a1 = 4.345;
-const double b1 = 1.743e+06;
-const double c1 = 6.402e+04;
-const double a2 = -0.3796;
-const double b2 = 1.708e+06;
-const double c2 = 8627;
-const double a3 = 1.311;
-const double b3 = 1.737e+06;
-const double c3 = 1.177e+04;
-const double a4 = 1.597e+14;
-const double b4 = 2.193e+06;
-const double c4 = 7.912e+04;
-const double a5 = 180.7;
-const double b5 = 2.831e+06;
-const double c5 = 7.44e+05;
+//const double a1 = 4.345;
+//const double b1 = 1.743e+06;
+//const double c1 = 6.402e+04;
+//const double a2 = -0.3796;
+//const double b2 = 1.708e+06;
+//const double c2 = 8627;
+//const double a3 = 1.311;
+//const double b3 = 1.737e+06;
+//const double c3 = 1.177e+04;
+//const double a4 = 1.597e+14;
+//const double b4 = 2.193e+06;
+//const double c4 = 7.912e+04;
+//const double a5 = 180.7;
+//const double b5 = 2.831e+06;
+//const double c5 = 7.44e+05;
+
+const double a1 = -2296065785.67983;
+const double a2 = -42.9396607798366;
+const double a3 = 71.1202538996357;
+const double a4 = 1.97005277208379;
+const double a5 = 2.65888051863607;
+const double b1 = -14319109714.5842;
+const double b2 = 1727891.16313180;
+const double b3 = 1779989.61935560;
+const double b4 = 1752249.48007110;
+const double b5 = 1301394.58816997;
+const double c1 = 29086654.4946966;
+const double c2 = 174681.058177461;
+const double c3 = 221054.380920647;
+const double c4 = 11281.2203781537;
+const double c5 = 172009.8260267170;
 
 //分段拟合31-60
 //const double sa1 = 29.18;
@@ -393,8 +409,10 @@ uint32_t freq_orig[100] = {
 uint32_t freq_cali[100];
 cali_data cali[100];
 uint8_t cali_cnt;
-double cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
-double freq_calied; // = freq_raw + cali_freq_delta
+float cali_delta_prev;
+float cali_delta_next;
+float cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
+float freq_calied; // = freq_raw + cali_freq_delta
 
 FATFS fs;                 // Work area (file system object) for logical drive
 FIL file;                  // file objects
@@ -453,7 +471,6 @@ int main(void)
     /* USER CODE BEGIN 1 */
     uint32_t max = 0;
     uint32_t min = 0xffffffff;
-    uint8_t rsted = 0;
     TCHAR str_buffer[256];
 
     uint8_t freq_prev_p;
@@ -522,9 +539,9 @@ int main(void)
 
         SendScreenPaperNum(paper_cnt);
         if (info) {
-            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld max:%ld min:%ld cnt_int:%ld paper_cnt:%d\r\n",
-                    cnt_raw, multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2], cnt_sum, max, min,
-                    int_cnt, ScreenCmd.CorrectNum);
+            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld cnt_int:%ld\r\n",
+                    cnt_raw, multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2], cnt_sum,
+                    int_cnt);
 
 //            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
 //            if (retSD) {
@@ -565,40 +582,29 @@ int main(void)
             sample_cnt = 0;
         }
 
-        if (cnt_raw > 3000) {
-            if (cnt_raw > max) {
-                max = cnt_raw;
-            }
-            if (cnt_raw < min) {
-                min = cnt_raw;
-            }
-        }
-
-        //记录校准频率
-        if (ScreenCmd.Correct) {
-            ScreenCmd.Correct = 0;
-
-            if (ScreenCmd.CorrectNum == 1) {
-                freq_cali[0] = freq_raw;
-                //TODO
-            } else {
-                freq_cali[ScreenCmd.CorrectNum / 10] = freq_raw;
-                //TODO
-            }
+        if (ScreenCmd.ScreenPage == 1) {
+            SendScreenRealFre(cnt_sum);
         }
         //计算校准公式
         if (ScreenCmd.Correct_apply) {
             cali_cnt = 0;
+            freq_prev_p = 0;
             for (int i = 0; i < 100; ++i) {
                 if (freq_cali[i] != 0) {
                     if (freq_prev_p != 0) {
+                        cali_delta_prev = (float) freq_orig[freq_prev_p] - (float) freq_cali[freq_prev_p];
+                        cali_delta_next = (float) freq_orig[i] - (float) freq_cali[i];
                         cali[cali_cnt].cali_k =
-                                ((freq_orig[i] - freq_cali[i]) - (freq_orig[freq_prev_p] - freq_cali[freq_prev_p])) /
-                                (double) (freq_cali[i] - freq_cali[freq_prev_p]);
-                        cali[cali_cnt].cali_b = freq_orig[i] - freq_cali[i] - cali[cali_cnt].cali_k * freq_cali[i];
+                                (cali_delta_next - cali_delta_prev) /
+                                (float) (freq_cali[i] - freq_cali[freq_prev_p]);
+                        cali[cali_cnt].cali_b = cali_delta_next -
+                                                cali[cali_cnt].cali_k * (float) freq_cali[i];
                         cali[cali_cnt].freq_divide = freq_cali[i];
                         freq_prev_p = i;
                         cali_cnt++;
+
+                        logDebug("cali_k:%f cali_b:%f", (float) cali[cali_cnt - 1].cali_k,
+                                 (float) cali[cali_cnt].cali_b);
                     } else {
                         cali[cali_cnt].cali_k = 0;
                         cali[cali_cnt].cali_b = 0;
@@ -608,6 +614,7 @@ int main(void)
                     }
                 }
             }
+            ScreenCmd.Correct_apply = 0;
         }
 
 /* USER CODE END WHILE */
@@ -959,7 +966,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         tmp[int_cnt] = cnt;
     }
 
-    if (int_cnt >= 22) {
+    if (int_cnt >= 22 && int_cnt <= 100) {
 
         tmp_next[p++] = cnt;
 
@@ -986,22 +993,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 #ifndef SAMPLING
     if (int_cnt == 100 && sample_cnt < 3) {
+
         int_cnt = 0;
 
         cali_used.cali_k = 0;
         cali_used.cali_b = 0;
         cali_used.freq_divide = 0;
         for (int i = 0; i < cali_cnt; ++i) {
-            if (cnt_sum < cali[i].freq_divide) {
+            if ((double) cnt_sum < cali[i].freq_divide) {
                 cali_used = cali[i];
                 break;
             }
         }
 
-        cali_freq_delta = cali_used.cali_k * cnt_sum + cali_used.cali_b;
-        freq_calied = cnt_sum + cali_freq_delta;
+        cali_freq_delta = cali_used.cali_k * (double) cnt_sum + cali_used.cali_b;
+        freq_calied = (double) cnt_sum + cali_freq_delta;
+        logDebug("cali_used_k:%lf cali_used_b:%lf cali_freq_delta:%lf calied_freq:%ld", cali_used.cali_k,
+                 cali_used.cali_b, cali_freq_delta, freq_calied);
 
-        if (cnt_sum < (freq_cali[30] == 0 ? freq_orig[30] : freq_cali[30])) {
+        if (cnt_sum < ((freq_cali[30] == 0 || freq_cali[31] == 0) ? (freq_orig[30] + freq_orig[31]) / 2 :
+                       (freq_cali[30] + freq_cali[31]) / 2)) {
             //0-30
 
 //        paper_fit = a * exp(b * cnt_sum) + c * exp(d * cnt_sum);
@@ -1035,29 +1046,45 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                     sa3 * exp(-pow(((freq_calied - sb3) / sc3), 2)) + sa4 * exp(-pow(((freq_calied - sb4) / sc4), 2)) +
                     sa5 * exp(-pow(((freq_calied - sb5) / sc5), 2));
         }
-        multi_paper_fit[sample_cnt++] = paper_fit;
+        multi_paper_fit[sample_cnt++] = paper_fit + 0.2;
     }
 
     if (sample_cnt == 3) {
         logDebug("%.2lf %.2lf %.2lf", multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2]);
         if (round(multi_paper_fit[0]) == round(multi_paper_fit[1]) &&
             round(multi_paper_fit[0]) == round(multi_paper_fit[2]) &&
-            round(multi_paper_fit[1]) == round(multi_paper_fit[2])) {
+            round(multi_paper_fit[1]) == round(multi_paper_fit[2]) &&
+            ScreenCmd.ScreenPage == 0) {
             rsted = 0;
             ScreenCmd.Start = 0;
-            sample_cnt = 0;
             paper_cnt = (uint16_t) round(multi_paper_fit[0]);
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             info = 0;
             freq_raw = cnt_sum;
+
+
+        } else if (ScreenCmd.ScreenPage == 1) {
+            rsted = 0;
+            ScreenCmd.Start = 0;
+            HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
+            info = 0;
+            freq_raw = cnt_sum;
+
+            SendScreenCorrectFre(freq_raw);
+
+            if (ScreenCmd.CorrectNum == 1) {
+                freq_cali[0] = freq_raw;
+            } else {
+                freq_cali[ScreenCmd.CorrectNum] = freq_raw;
+            }
         } else {
-            sample_cnt = 0;
             paper_cnt = 0;
             rsted = 0;
             logDebug("not same");
             HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
             freq_raw = 0;
         }
+        sample_cnt++;
     }
 #else
     if (int_cnt == 200) {

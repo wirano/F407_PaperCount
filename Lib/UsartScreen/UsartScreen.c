@@ -6,14 +6,14 @@
 
 ScreenCmdSt ScreenCmd=
         {
-            .Start=0,
-            .PaperNum=0,
-            .CorrectNum=0,
-            .Finish=1,
-            .Stop=0,
-            .Correct=0,
-            .Correct_apply=1,
-            .ScreenPage=0,
+                .Start=0,
+                .PaperNum=0,
+                .CorrectNum=0,
+                .Finish=1,
+                .Stop=0,
+                .Correct=0,
+                .Correct_apply=0,
+                .ScreenPage=0,
         };
 
 //接收串口屏发送到单片机的数据
@@ -64,7 +64,6 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=0;
-        ScreenCmd.Correct_apply=1;
 //        printf("Start\r\n");
     }
     else if(*(data_buffer+1)==0X02)                        //校准指令
@@ -73,7 +72,6 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=1;
-        ScreenCmd.Correct_apply=0;
         ScreenCmd.CorrectNum = ((data_buffer[3])<<8) | data_buffer[2];
 //        printf("Number=%d\r\n",ScreenCmd.CorrectNum);
     }
@@ -83,7 +81,6 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=1;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=0;
-        ScreenCmd.Correct_apply=1;
 //        printf("Finish\r\n");
     }
     else if(*(data_buffer+1)==0X04)                        //中止指令
@@ -92,7 +89,6 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=1;
         ScreenCmd.Correct=0;
-        ScreenCmd.Correct_apply=1;
     }
     else if(*(data_buffer+1)==0X05)                        //校准完成计算数据
     {
@@ -108,7 +104,6 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=1;
         ScreenCmd.Correct=0;
-        ScreenCmd.Correct_apply=1;
 
         if(data_buffer[2]==0x00)
         {
