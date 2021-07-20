@@ -404,7 +404,12 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
-    easyflash_init();
+//    easyflash_init();
+    sfud_init();
+    char t[2];
+    sfud_write(sfud_get_device_table(), 0, 2, "A");
+    sfud_read(sfud_get_device_table(), 0, 2, t);
+    logDebug("%s", t);
 
 //    if (BSP_SD_IsDetected() == SD_PRESENT) {
 //        retSD = f_mount(&fs, "", 0);
