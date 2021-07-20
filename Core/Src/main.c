@@ -1008,8 +1008,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         cali_freq_delta = cali_used.cali_k * (double) cnt_sum + cali_used.cali_b;
         freq_calied = (double) cnt_sum + cali_freq_delta;
-        logDebug("cali_used_k:%lf cali_used_b:%lf cali_freq_delta:%lf calied_freq:%ld", cali_used.cali_k,
-                 cali_used.cali_b, cali_freq_delta, freq_calied);
+//        logDebug("cali_used_k:%lf cali_used_b:%lf cali_freq_delta:%lf calied_freq:%ld", cali_used.cali_k,
+//                 cali_used.cali_b, cali_freq_delta, freq_calied);
 
         if (cnt_sum < ((freq_cali[30] == 0 || freq_cali[31] == 0) ? (freq_orig[30] + freq_orig[31]) / 2 :
                        (freq_cali[30] + freq_cali[31]) / 2)) {
@@ -1046,7 +1046,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                     sa3 * exp(-pow(((freq_calied - sb3) / sc3), 2)) + sa4 * exp(-pow(((freq_calied - sb4) / sc4), 2)) +
                     sa5 * exp(-pow(((freq_calied - sb5) / sc5), 2));
         }
-        multi_paper_fit[sample_cnt++] = paper_fit + 0.2;
+        multi_paper_fit[sample_cnt++] = paper_fit;
     }
 
     if (sample_cnt == 3) {
