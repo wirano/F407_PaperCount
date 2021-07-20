@@ -560,7 +560,7 @@ int main(void)
             if (rsted == 0) {
                 HAL_Delay(1000);
                 HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_SET);
-                HAL_Delay(3000);
+                HAL_Delay(13000);
                 sample_cnt = 0;
                 int_cnt = 0;
                 rsted = 1;
