@@ -196,7 +196,7 @@ void sfud_log_debug(const char *file, const long line, const char *format, ...)
     printf("[SFUD](%s:%ld) ", file, line);
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
-    printf("%s\n", log_buf);
+    printf("%s\r\n", log_buf);
     va_end(args);
 }
 
@@ -215,6 +215,6 @@ void sfud_log_info(const char *format, ...)
     printf("[SFUD]");
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
-    printf("%s\n", log_buf);
+    printf("%s\r\n", log_buf);
     va_end(args);
 }

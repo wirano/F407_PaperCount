@@ -30,7 +30,7 @@
 #define EF_CFG_H_
 
 /* using ENV function, default is NG (Next Generation) mode start from V4.0 */
-#define EF_USING_ENV
+#define EF_USING_ENV    0
 
 #ifdef EF_USING_ENV
 /* Auto update ENV to latest default when current ENV version number is changed. */
@@ -39,7 +39,7 @@
  * ENV version number defined by user.
  * Please change it when your firmware add a new ENV to default_env_set.
  */
-#define EF_ENV_VER_NUM            /* @note you must define it for a value, such as 0 */
+#define EF_ENV_VER_NUM  0            /* @note you must define it for a value, such as 0 */
  
 /* MCU Endian Configuration, default is Little Endian Order. */
 /* #define EF_BIG_ENDIAN  */         
@@ -53,11 +53,11 @@
 /* #define EF_USING_LOG */
 
 /* The minimum size of flash erasure. May be a flash sector size. */
-#define EF_ERASE_MIN_SIZE         /* @note you must define it for a value */
+#define EF_ERASE_MIN_SIZE   4096         /* @note you must define it for a value */
 
 /* the flash write granularity, unit: bit
  * only support 1(nor flash)/ 8(stm32f4)/ 32(stm32f1) */
-#define EF_WRITE_GRAN             /* @note you must define it for a value */
+#define EF_WRITE_GRAN       32             /* @note you must define it for a value */
 
 /*
  *
@@ -81,10 +81,10 @@
  */
 
 /* backup area start address */
-#define EF_START_ADDR             /* @note you must define it for a value */
+#define EF_START_ADDR         (0)    /* @note you must define it for a value */
 
 /* ENV area size. It's at least one empty sector for GC. So it's definition must more then or equal 2 flash sector size. */
-#define ENV_AREA_SIZE             /* @note you must define it for a value if you used ENV */
+#define ENV_AREA_SIZE         (4096 * EF_ERASE_MIN_SIZE)   /* @note you must define it for a value if you used ENV */
 
 /* saved log area size */
 #define LOG_AREA_SIZE             /* @note you must define it for a value if you used log */

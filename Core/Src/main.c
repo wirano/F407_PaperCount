@@ -29,6 +29,7 @@
 #include "stdio.h"
 #include "UsartScreen.h"
 #include "sfud.h"
+#include "easyflash.h"
 
 /* USER CODE END Includes */
 
@@ -403,7 +404,7 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
-    sfud_init();
+    easyflash_init();
 
 //    if (BSP_SD_IsDetected() == SD_PRESENT) {
 //        retSD = f_mount(&fs, "", 0);

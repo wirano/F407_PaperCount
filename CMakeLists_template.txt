@@ -50,6 +50,7 @@ include_directories(${includes}
                     Lib/letter-shell/extensions/log
                     Lib/UsartScreen
                     Lib/SFUD/sfud/inc
+                    Lib/EasyFlash/easyflash/inc
                     )
 
 add_definitions(${defines})
@@ -59,6 +60,8 @@ file(GLOB_RECURSE SOURCES ${sources}
      "Lib/letter-shell/extensions/log/*.c"
      "Lib/UsartScreen/*.c"
      "Lib/SFUD/sfud/*.c"
+     "Lib/EasyFlash/easyflash/port/*.c"
+     "Lib/EasyFlash/easyflash/src/*.c"
     )
 
 set(LINKER_SCRIPT $${CMAKE_SOURCE_DIR}/${linkerScript})

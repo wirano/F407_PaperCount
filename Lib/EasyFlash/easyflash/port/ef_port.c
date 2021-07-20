@@ -29,6 +29,11 @@
 #include <easyflash.h>
 #include <stdarg.h>
 
+#include "cmsis_gcc.h"
+#include "sfud.h"
+
+static uint8_t log_buf[128];
+
 /* default environment variables set for user */
 static const ef_env default_env_set[] = {
 
@@ -42,11 +47,20 @@ static const ef_env default_env_set[] = {
  *
  * @return result
  */
-EfErrCode ef_port_init(ef_env const **default_env, size_t *default_env_size) {
+EfErrCode ef_port_init(ef_env const **default_env, size_t *default_env_size)
+{
     EfErrCode result = EF_NO_ERR;
 
     *default_env = default_env_set;
     *default_env_size = sizeof(default_env_set) / sizeof(default_env_set[0]);
+
+    sfud_err sfud_result = SFUD_SUCCESS;
+
+    sfud_result = sfud_init();
+
+    if (sfud_result != SFUD_SUCCESS) {
+        result = EF_READ_ERR;
+    }
 
     return result;
 }
@@ -61,10 +75,19 @@ EfErrCode ef_port_init(ef_env const **default_env, size_t *default_env_size) {
  *
  * @return result
  */
-EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
+EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size)
+{
     EfErrCode result = EF_NO_ERR;
 
     /* You can add your code under here. */
+    const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q128_DEVICE_INDEX;
+    sfud_err sfud_result = SFUD_SUCCESS;
+
+    sfud_result = sfud_read(flash, addr, size, (uint8_t *) buf);
+
+    if (sfud_result != SFUD_SUCCESS) {
+        result = EF_READ_ERR;
+    }
 
     return result;
 }
@@ -79,16 +102,26 @@ EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
  *
  * @return result
  */
-EfErrCode ef_port_erase(uint32_t addr, size_t size) {
+EfErrCode ef_port_erase(uint32_t addr, size_t size)
+{
     EfErrCode result = EF_NO_ERR;
 
     /* make sure the start address is a multiple of EF_ERASE_MIN_SIZE */
     EF_ASSERT(addr % EF_ERASE_MIN_SIZE == 0);
 
     /* You can add your code under here. */
+    const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q128_DEVICE_INDEX;
+    sfud_err sfud_result = SFUD_SUCCESS;
+
+    sfud_result = sfud_erase(flash, addr, size);
+
+    if (sfud_result != SFUD_SUCCESS) {
+        result = EF_ERASE_ERR;
+    }
 
     return result;
 }
+
 /**
  * Write data to flash.
  * @note This operation's units is word.
@@ -100,10 +133,20 @@ EfErrCode ef_port_erase(uint32_t addr, size_t size) {
  *
  * @return result
  */
-EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
+EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size)
+{
     EfErrCode result = EF_NO_ERR;
-    
+
     /* You can add your code under here. */
+
+    const sfud_flash *flash = sfud_get_device_table() + SFUD_W25Q128_DEVICE_INDEX;
+    sfud_err sfud_result = SFUD_SUCCESS;
+
+    sfud_result = sfud_write(flash, addr, size, (const uint8_t *) buf);
+
+    if (sfud_result != SFUD_SUCCESS) {
+        result = EF_WRITE_ERR;
+    }
 
     return result;
 }
@@ -111,19 +154,23 @@ EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
 /**
  * lock the ENV ram cache
  */
-void ef_port_env_lock(void) {
-    
+void ef_port_env_lock(void)
+{
+
     /* You can add your code under here. */
-    
+    __disable_irq();
+
 }
 
 /**
  * unlock the ENV ram cache
  */
-void ef_port_env_unlock(void) {
-    
+void ef_port_env_unlock(void)
+{
+
     /* You can add your code under here. */
-    
+    __enable_irq();
+
 }
 
 
@@ -136,7 +183,8 @@ void ef_port_env_unlock(void) {
  * @param ... args
  *
  */
-void ef_log_debug(const char *file, const long line, const char *format, ...) {
+void ef_log_debug(const char *file, const long line, const char *format, ...)
+{
 
 #ifdef PRINT_DEBUG
 
@@ -146,7 +194,12 @@ void ef_log_debug(const char *file, const long line, const char *format, ...) {
     va_start(args, format);
 
     /* You can add your code under here. */
-    
+    ef_print("[Flash](%s:%ld) ", file, line);
+    /* must use vprintf to print */
+    vsprintf(log_buf, format, args);
+    ef_print("%s", log_buf);
+    printf("\r\n");
+
     va_end(args);
 
 #endif
@@ -159,29 +212,39 @@ void ef_log_debug(const char *file, const long line, const char *format, ...) {
  * @param format output format
  * @param ... args
  */
-void ef_log_info(const char *format, ...) {
+void ef_log_info(const char *format, ...)
+{
     va_list args;
 
     /* args point to the first variable parameter */
     va_start(args, format);
 
     /* You can add your code under here. */
-    
+    ef_print("[Flash]");
+    /* must use vprintf to print */
+    vsprintf(log_buf, format, args);
+    ef_print("%s", log_buf);
+    printf("\r\n");
+
     va_end(args);
 }
+
 /**
  * This function is print flash non-package info.
  *
  * @param format output format
  * @param ... args
  */
-void ef_print(const char *format, ...) {
+void ef_print(const char *format, ...)
+{
     va_list args;
 
     /* args point to the first variable parameter */
     va_start(args, format);
 
     /* You can add your code under here. */
-    
+    vsprintf(log_buf, format, args);
+    printf("%s", log_buf);
+
     va_end(args);
 }
