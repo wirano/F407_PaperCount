@@ -138,7 +138,7 @@ void SendScreenRealFre(uint32_t f)
     static uint8_t StrCommand[30];
     uint8_t StrLen=0;      //字符串命令长度
 
-    sprintf(StrCommand,"n1.val=%d",f);                        //拼接 字符串命令主干+值
+    sprintf(StrCommand,"n1.val=%d",f);                          //拼接 字符串命令主干+值
     StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
     StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
     StrCommand[StrLen+1]=0XFF;
@@ -154,6 +154,29 @@ void SendScreenCorrectFre(uint32_t f)
     uint8_t StrLen=0;      //字符串命令长度
 
     sprintf(StrCommand,"n100.val=%d",f);                        //拼接 字符串命令主干+值
+    StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
+    StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
+    StrCommand[StrLen+1]=0XFF;
+    StrCommand[StrLen+2]=0XFF;
+    StrCommand[StrLen+3]=0X00;                                  //给字符串后加\0，防止之前的数据影响
+    HAL_UART_Transmit(&huart3, StrCommand, StrLen+3, 100);//发送字符串命令给串口屏
+}
+
+//单片机向串口屏发送极板状态
+void SendScreenPlateState(PlateStateEm state)
+{
+    static uint8_t StrCommand[30];
+    uint8_t StrLen=0;      //字符串命令长度
+
+    if(state==ShortCircuit)
+    {
+        sprintf(StrCommand,"t3.txt=\"是\"");               //拼接 字符串命令主干+值
+    }
+    else if(state==NoShortCircuit)
+    {
+        sprintf(StrCommand,"t3.txt=\"否\"");               //拼接 字符串命令主干+值
+    }
+
     StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
     StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
     StrCommand[StrLen+1]=0XFF;
