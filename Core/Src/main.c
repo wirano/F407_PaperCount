@@ -505,6 +505,8 @@ int main(void)
 
     uint8_t freq_prev_p;
     uint8_t cali_line_cnt;
+
+    uint8_t ef_saved_len;
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -541,6 +543,15 @@ int main(void)
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
 
     easyflash_init();
+
+    ef_get_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali), &ef_saved_len);
+    if (ef_saved_len == 0) {
+        logDebug("no table");
+        ef_set_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali));
+    }
+    ef_get_env_blob("freq_cali_table", NULL, sizeof(freq_cali), &ef_saved_len);
+    logDebug("saved data:%d", ef_saved_len);
+
 
 //    if (BSP_SD_IsDetected() == SD_PRESENT) {
 //        retSD = f_mount(&fs, "", 0);
@@ -614,6 +625,7 @@ int main(void)
         }
         //计算校准公式
         if (ScreenCmd.Correct_apply) {
+            ef_set_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali));
             cali_cnt = 0;
             freq_prev_p = 0;
             for (int i = 0; i < 100; ++i) {
@@ -1198,6 +1210,40 @@ void print_paper()
 }
 
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), printp, print_paper, print paper);
+
+void show_cali_table()
+{
+    for (int i = 0; i < sizeof(freq_cali) / sizeof(uint32_t); ++i) {
+        logInfo("%d %ld", i, freq_cali[i]);
+    }
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), show_cali_table, show_cali_table,
+                 show_cali_table);
+
+uint8_t write_cali_table()
+{
+    uint8_t len;
+
+    len = ef_set_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali));
+
+    return len;
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), write_cali_table, write_cali_table,
+                 write_cali_table);
+
+uint8_t read_cali_table()
+{
+    uint8_t len;
+
+    ef_get_env_blob("freq_cali_table", NULL, sizeof(freq_cali), &len);
+
+    return len;
+}
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), read_cali_table, read_cali_table,
+                 read_cali_table);
 
 /* USER CODE END 4 */
 
