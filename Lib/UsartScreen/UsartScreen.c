@@ -12,6 +12,8 @@ ScreenCmdSt ScreenCmd=
             .Finish=1,
             .Stop=0,
             .Correct=0,
+            .Correct_apply=1,
+            .ScreenPage=0,
         };
 
 //接收串口屏发送到单片机的数据
@@ -62,6 +64,7 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=0;
+        ScreenCmd.Correct_apply=1;
 //        printf("Start\r\n");
     }
     else if(*(data_buffer+1)==0X02)                        //校准指令
@@ -70,6 +73,7 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=1;
+        ScreenCmd.Correct_apply=0;
         ScreenCmd.CorrectNum = ((data_buffer[3])<<8) | data_buffer[2];
 //        printf("Number=%d\r\n",ScreenCmd.CorrectNum);
     }
@@ -79,6 +83,7 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=1;
         ScreenCmd.Stop=0;
         ScreenCmd.Correct=0;
+        ScreenCmd.Correct_apply=1;
 //        printf("Finish\r\n");
     }
     else if(*(data_buffer+1)==0X04)                        //中止指令
@@ -87,6 +92,32 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         ScreenCmd.Finish=0;
         ScreenCmd.Stop=1;
         ScreenCmd.Correct=0;
+        ScreenCmd.Correct_apply=1;
+    }
+    else if(*(data_buffer+1)==0X05)                        //校准完成计算数据
+    {
+        ScreenCmd.Start=0;
+        ScreenCmd.Finish=0;
+        ScreenCmd.Stop=1;
+        ScreenCmd.Correct=0;
+        ScreenCmd.Correct_apply=1;
+    }
+    else if(*(data_buffer+1)==0X06)                        //切换页面
+    {
+        ScreenCmd.Start=0;
+        ScreenCmd.Finish=0;
+        ScreenCmd.Stop=1;
+        ScreenCmd.Correct=0;
+        ScreenCmd.Correct_apply=1;
+
+        if(data_buffer[2]==0x00)
+        {
+            ScreenCmd.ScreenPage=0;
+        }
+        else if(data_buffer[2]==0x01)
+        {
+            ScreenCmd.ScreenPage=1;
+        }
     }
 //    SendScreenPaperNum(ScreenCmd.Stop);
 }
@@ -98,6 +129,36 @@ void SendScreenPaperNum(uint16_t num)
     uint8_t StrLen=0;      //字符串命令长度
 
     sprintf(StrCommand,"n0.val=%d",num);                        //拼接 字符串命令主干+值
+    StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
+    StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
+    StrCommand[StrLen+1]=0XFF;
+    StrCommand[StrLen+2]=0XFF;
+    StrCommand[StrLen+3]=0X00;                                  //给字符串后加\0，防止之前的数据影响
+    HAL_UART_Transmit(&huart3, StrCommand, StrLen+3, 100);//发送字符串命令给串口屏
+}
+
+//单片机向串口屏发送当前频率
+void SendScreenRealFre(uint32_t f)
+{
+    static uint8_t StrCommand[30];
+    uint8_t StrLen=0;      //字符串命令长度
+
+    sprintf(StrCommand,"n1.val=%d",f);                        //拼接 字符串命令主干+值
+    StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
+    StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
+    StrCommand[StrLen+1]=0XFF;
+    StrCommand[StrLen+2]=0XFF;
+    StrCommand[StrLen+3]=0X00;                                  //给字符串后加\0，防止之前的数据影响
+    HAL_UART_Transmit(&huart3, StrCommand, StrLen+3, 100);//发送字符串命令给串口屏
+}
+
+//单片机向串口屏发送校准时的频率
+void SendScreenCorrectFre(uint32_t f)
+{
+    static uint8_t StrCommand[30];
+    uint8_t StrLen=0;      //字符串命令长度
+
+    sprintf(StrCommand,"n100.val=%d",f);                        //拼接 字符串命令主干+值
     StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
     StrCommand[StrLen]=0XFF;                                    //给出完整字符串命令，末尾加3个0XFF
     StrCommand[StrLen+1]=0XFF;
