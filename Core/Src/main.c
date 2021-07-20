@@ -35,8 +35,8 @@
 /* USER CODE BEGIN PTD */
 typedef struct
 {
-    float cali_k;  // cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
-    float cali_b;  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
+    double cali_k;  // cali_k = ((freq_orig[i+1] - freq_cali[i+1]) - (freq_orig[i] - freq_cali[i])) / (freq_cali[i+1] - freq_cali[i])
+    double cali_b;  // b = freq_orig[i] - cali_k[i] * freq_cali[i]
     uint32_t freq_divide;
 } cali_data;
 /* USER CODE END PTD */
@@ -261,21 +261,21 @@ UART_HandleTypeDef huart3;
 //const double b5 = 2.831e+06;
 //const double c5 = 7.44e+05;
 
-const double a1 = -2296065785.67983;
-const double a2 = -42.9396607798366;
-const double a3 = 71.1202538996357;
-const double a4 = 1.97005277208379;
-const double a5 = 2.65888051863607;
-const double b1 = -14319109714.5842;
-const double b2 = 1727891.16313180;
-const double b3 = 1779989.61935560;
-const double b4 = 1752249.48007110;
-const double b5 = 1301394.58816997;
-const double c1 = 29086654.4946966;
-const double c2 = 174681.058177461;
-const double c3 = 221054.380920647;
-const double c4 = 11281.2203781537;
-const double c5 = 172009.8260267170;
+//const double a1 = -2296065785.67983;
+//const double a2 = -42.9396607798366;
+//const double a3 = 71.1202538996357;
+//const double a4 = 1.97005277208379;
+//const double a5 = 2.65888051863607;
+//const double b1 = -14319109714.5842;
+//const double b2 = 1727891.16313180;
+//const double b3 = 1779989.61935560;
+//const double b4 = 1752249.48007110;
+//const double b5 = 1301394.58816997;
+//const double c1 = 29086654.4946966;
+//const double c2 = 174681.058177461;
+//const double c3 = 221054.380920647;
+//const double c4 = 11281.2203781537;
+//const double c5 = 172009.8260267170;
 
 //分段拟合31-60
 //const double sa1 = 29.18;
@@ -326,6 +326,23 @@ const double sc3 = 1367.61857462206;
 const double sc4 = 9916.34116648308;
 const double sc5 = 263978.2607868750;
 
+//分段1-60
+const double a1 = 783977865241.027;
+const double a2 = -0.61941699913566;
+const double a3 = 0.239424253756763;
+const double a4 = -107.984760307175;
+const double a5 = 136.148129526825;
+const double b1 = 3797233.68171086;
+const double b2 = 1792393.58824605;
+const double b3 = 1745113.15293356;
+const double b4 = 1770300.47193437;
+const double b5 = 1810771.74656375;
+const double c1 = 404327.926197317;
+const double c2 = 6117.02844524817;
+const double c3 = 11257.9336995076;
+const double c4 = 296917.888697193;
+const double c5 = 325434.564116762;
+
 
 double paper_fit;
 uint16_t paper_cnt;
@@ -345,74 +362,82 @@ uint8_t info = 0;
 // 校准
 uint32_t freq_orig[100] = {
         0,
-        1130436,
-        1203761,
-        1280964,
-        1376459,
-        1436646,
-        1461632,
-        1493506,
-        1524845,
-        1543454,
-        1572750,
-        1586142,
-        1604331,
-        1618982,
-        1636608,
-        1648941,
-        1659722,
-        1668247,
-        1679421,
-        1687745,
-        1695570,
-        1704013,
-        1710613,
-        1717419,
-        1724690,
-        1733806,
-        1736905,
-        1740400,
-        1744747,
-        1748169,
-        1753083,
-        1756396,
-        1761100,
-        1763812,
-        1768803,
-        1772660,
-        1774881,
-        1776451,
-        1779230,
-        1780875,
-        1782585,
-        1783962,
-        1785697,
-        1787465,
-        1790944,
-        1792859,
-        1795267,
-        1796747,
-        1800082,
-        1801164,
-        1802787,
-        1804200,
-        1805721,
-        1806551,
-        1808710,
-        1809772,
-        1811446,
-        1812691,
-        1814181,
-        1815000,
-        1815793,
+        1180987,
+        1249741,
+        1304514,
+        1362014,
+        1402742,
+        1448322,
+        1484318,
+        1514407,
+        1539484,
+        1561890,
+        1583233,
+        1600445,
+        1617203,
+        1632766,
+        1644369,
+        1656841,
+        1666625,
+        1676171,
+        1685236,
+        1694574,
+        1701850,
+        1708211,
+        1715314,
+        1722343,
+        1727005,
+        1732513,
+        1736879,
+        1741529,
+        1745903,
+        1750025,
+        1754479,
+        1758307,
+        1761960,
+        1765337,
+        1768563,
+        1771146,
+        1773862,
+        1776834,
+        1779755,
+        1782132,
+        1784542,
+        1787400,
+        1789553,
+        1792116,
+        1793989,
+        1795457,
+        1797613,
+        1798536,
+        1800126,
+        1801867,
+        1803697,
+        1804901,
+        1806125,
+        1808080,
+        1809532,
+        1811167,
+        1812493,
+        1813829,
+        1814792,
+        1815500,
+        1816337,
+        1817870,
+        1818578,
+        1819673,
+        1820874,
+        1821548,
+        1822805
 };
+
 uint32_t freq_cali[100];
 cali_data cali[100];
 uint8_t cali_cnt;
-float cali_delta_prev;
-float cali_delta_next;
-float cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
-float freq_calied; // = freq_raw + cali_freq_delta
+double cali_delta_prev;
+double cali_delta_next;
+double cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
+double freq_calied; // = freq_raw + cali_freq_delta
 
 FATFS fs;                 // Work area (file system object) for logical drive
 FIL file;                  // file objects
@@ -575,12 +600,6 @@ int main(void)
             sample_cnt = 0;
             paper[ScreenCmd.CorrectNum] = cnt_sum;
         }
-        if (ScreenCmd.Stop) {
-            HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET);
-            rsted = 0;
-            info = 0;
-            sample_cnt = 0;
-        }
 
         if (ScreenCmd.ScreenPage == 1) {
             SendScreenRealFre(cnt_sum);
@@ -592,19 +611,19 @@ int main(void)
             for (int i = 0; i < 100; ++i) {
                 if (freq_cali[i] != 0) {
                     if (freq_prev_p != 0) {
-                        cali_delta_prev = (float) freq_orig[freq_prev_p] - (float) freq_cali[freq_prev_p];
-                        cali_delta_next = (float) freq_orig[i] - (float) freq_cali[i];
+                        cali_delta_prev = (double) freq_orig[freq_prev_p] - (double) freq_cali[freq_prev_p];
+                        cali_delta_next = (double) freq_orig[i] - (double) freq_cali[i];
                         cali[cali_cnt].cali_k =
                                 (cali_delta_next - cali_delta_prev) /
-                                (float) (freq_cali[i] - freq_cali[freq_prev_p]);
+                                (double) (freq_cali[i] - freq_cali[freq_prev_p]);
                         cali[cali_cnt].cali_b = cali_delta_next -
-                                                cali[cali_cnt].cali_k * (float) freq_cali[i];
+                                                cali[cali_cnt].cali_k * (double) freq_cali[i];
                         cali[cali_cnt].freq_divide = freq_cali[i];
                         freq_prev_p = i;
                         cali_cnt++;
 
-                        logDebug("cali_k:%f cali_b:%f", (float) cali[cali_cnt - 1].cali_k,
-                                 (float) cali[cali_cnt].cali_b);
+                        logDebug("cali_k:%f cali_b:%f", (double) cali[cali_cnt - 1].cali_k,
+                                 (double) cali[cali_cnt].cali_b);
                     } else {
                         cali[cali_cnt].cali_k = 0;
                         cali[cali_cnt].cali_b = 0;
@@ -1011,8 +1030,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //        logDebug("cali_used_k:%lf cali_used_b:%lf cali_freq_delta:%lf calied_freq:%ld", cali_used.cali_k,
 //                 cali_used.cali_b, cali_freq_delta, freq_calied);
 
-        if (cnt_sum < ((freq_cali[30] == 0 || freq_cali[31] == 0) ? (freq_orig[30] + freq_orig[31]) / 2 :
-                       (freq_cali[30] + freq_cali[31]) / 2)) {
+        if (cnt_sum < ((freq_cali[60] == 0 || freq_cali[61] == 0) ? (freq_orig[60] + freq_orig[61]) / 2 :
+                       (freq_cali[60] + freq_cali[61]) / 2)) {
             //0-30
 
 //        paper_fit = a * exp(b * cnt_sum) + c * exp(d * cnt_sum);
@@ -1046,7 +1065,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                     sa3 * exp(-pow(((freq_calied - sb3) / sc3), 2)) + sa4 * exp(-pow(((freq_calied - sb4) / sc4), 2)) +
                     sa5 * exp(-pow(((freq_calied - sb5) / sc5), 2));
         }
-        multi_paper_fit[sample_cnt++] = paper_fit;
+        if (rsted) {
+            multi_paper_fit[sample_cnt++] = paper_fit;
+        }
     }
 
     if (sample_cnt == 3) {
