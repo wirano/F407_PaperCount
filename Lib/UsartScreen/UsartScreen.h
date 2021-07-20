@@ -17,14 +17,21 @@ typedef struct
     uint8_t Stop;             //中止测量命令
     uint8_t Correct;          //校准指令
     uint8_t Correct_apply;    //校准完成计算数据
-    uint8_t ScreenPage;      //屏幕当前界面
+    uint8_t ScreenPage;       //屏幕当前界面
 }ScreenCmdSt;
+
+typedef enum
+{
+    ShortCircuit,             //短路
+    NoShortCircuit,           //未短路
+}PlateStateEm;
 
 void UsartScreenReceive(uint8_t data);                          //接收串口屏发送到单片机的数据
 void UsartScreenAnalysis(uint8_t *data_buffer);                 //解析串口屏发送到单片机的数据
 void SendScreenPaperNum(uint16_t num);                          //单片机向串口屏发送纸张数
 void SendScreenRealFre(uint32_t f);                             //单片机向串口屏发送实时频率
 void SendScreenCorrectFre(uint32_t f);                          //单片机向串口屏发送校准时的频率
+void SendScreenPlateState(PlateStateEm state);                  //单片机向串口屏发送极板状态
 
 extern ScreenCmdSt ScreenCmd;
 
