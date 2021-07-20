@@ -28,6 +28,7 @@
 #include "shell_control.h"
 #include "stdio.h"
 #include "UsartScreen.h"
+#include "sfud.h"
 
 /* USER CODE END Includes */
 
@@ -322,11 +323,8 @@ static void MX_TIM6_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
-
 static void MX_SDIO_SD_Init(void);
-
 static void MX_SPI1_Init(void);
-
 /* USER CODE BEGIN PFP */
 void print_paper();
 
@@ -362,12 +360,12 @@ int main(void)
     TCHAR str_buffer[256];
     /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
     /* USER CODE END Init */
 
@@ -394,6 +392,8 @@ int main(void)
     HAL_TIM_Base_Start(&htim2);
     HAL_TIM_Base_Start_IT(&htim6);
     HAL_UART_Receive_IT(&huart3, &Usart3Buffer, 1);
+
+    sfud_init();
 
 //    if (BSP_SD_IsDetected() == SD_PRESENT) {
 //        retSD = f_mount(&fs, "", 0);
@@ -580,7 +580,7 @@ static void MX_SPI1_Init(void)
     hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
     hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
     hspi1.Init.NSS = SPI_NSS_SOFT;
-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
     hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -811,8 +811,8 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOF_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();
 
@@ -840,9 +840,9 @@ static void MX_GPIO_Init(void)
 
     /*Configure GPIO pin : SPI1_NSS_Pin */
     GPIO_InitStruct.Pin = SPI1_NSS_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(SPI1_NSS_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pin : LED_Pin */

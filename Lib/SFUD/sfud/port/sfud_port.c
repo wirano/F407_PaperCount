@@ -122,6 +122,24 @@ static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi
 
 #endif /* SFUD_USING_QSPI */
 
+static void spi_lock(const sfud_spi *spi)
+{
+    __disable_irq();
+}
+
+static void spi_unlock(const sfud_spi *spi)
+{
+    __enable_irq();
+}
+
+static void retry_delay_1ms(void)
+{
+    HAL_Delay(1);
+}
+
+extern SPI_HandleTypeDef hspi1;
+static spi_user_data spi1 = {.spix = &hspi1, .cs_gpiox = GPIOC, .cs_gpio_pin = GPIO_PIN_4};
+
 sfud_err sfud_spi_port_init(sfud_flash *flash)
 {
     sfud_err result = SFUD_SUCCESS;
@@ -140,6 +158,23 @@ sfud_err sfud_spi_port_init(sfud_flash *flash)
      *    flash->retry.delay = null;
      *    flash->retry.times = 10000; //Required
      */
+
+    switch (flash->index) {
+        case SFUD_W25Q128_DEVICE_INDEX: {
+            __HAL_SPI_ENABLE(&hspi1);
+            /* 同步 Flash 移植所需的接口及数据 */
+            flash->spi.wr = spi_write_read;
+            flash->spi.lock = spi_lock;
+            flash->spi.unlock = spi_unlock;
+            flash->spi.user_data = &spi1;
+            /* about 100 microsecond delay */
+            flash->retry.delay = retry_delay_1ms;
+            /* adout 10 seconds timeout */
+            flash->retry.times = 10 * 1000;
+
+            break;
+        }
+    }
 
     return result;
 }
