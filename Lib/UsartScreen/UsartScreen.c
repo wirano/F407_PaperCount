@@ -64,7 +64,8 @@ void UsartScreenReceive(uint8_t data)
 //解析串口屏发送到单片机的数据
 void UsartScreenAnalysis(uint8_t *data_buffer)
 {
-    uint16_t DataTemp=0;
+    uint16_t DataTemp_u16=0;
+    int16_t DataTemp_s16=0;
 
     if(*(data_buffer+1)==0X01)                             //开始指令
     {
@@ -138,8 +139,9 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
     else if(*(data_buffer+1)==0X0A)                       //设置偏移
     {
         ScreenCmd.Offset=1;
-        DataTemp=((data_buffer[3])<<8) | data_buffer[2];
-        ScreenCmd.OffsetData=(float)DataTemp/100;
+        DataTemp_u16=((data_buffer[3])<<8) | data_buffer[2];
+        DataTemp_s16=(int16_t)DataTemp_u16;
+        ScreenCmd.OffsetData=(float)DataTemp_s16/100;
     }
     else if(*(data_buffer+1)==0X0B)                       //删除偏移——起点
     {
