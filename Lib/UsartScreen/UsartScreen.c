@@ -6,14 +6,20 @@
 
 ScreenCmdSt ScreenCmd=
         {
-                .Start=0,
-                .PaperNum=0,
-                .CorrectNum=0,
-                .Finish=0,
-                .Stop=0,
-                .Correct=0,
-                .Correct_apply=0,
-                .ScreenPage=0,
+            .Start=0,
+            .PaperNum=0,
+            .CorrectNum=0,
+            .Finish=0,
+            .Stop=0,
+            .Correct=0,
+            .Correct_apply=0,
+            .ScreenPage=0,
+            .DeleteCorrect=0,
+            .DeleteCorrectData=0,
+            .Offset=0,
+            .OffsetPaper1=0,
+            .OffsetPaper2=0,
+            .OffsetData=0,
         };
 
 //接收串口屏发送到单片机的数据
@@ -58,6 +64,9 @@ void UsartScreenReceive(uint8_t data)
 //解析串口屏发送到单片机的数据
 void UsartScreenAnalysis(uint8_t *data_buffer)
 {
+    uint16_t DataTemp_u16=0;
+    int16_t DataTemp_s16=0;
+
     if(*(data_buffer+1)==0X01)                             //开始指令
     {
         ScreenCmd.Start=1;
@@ -113,6 +122,35 @@ void UsartScreenAnalysis(uint8_t *data_buffer)
         {
             ScreenCmd.ScreenPage=1;
         }
+    }
+    else if(*(data_buffer+1)==0X07)                       //删除校准数据
+    {
+        ScreenCmd.DeleteCorrect=1;
+        ScreenCmd.DeleteCorrectData=((data_buffer[3])<<8) | data_buffer[2];
+    }
+    else if(*(data_buffer+1)==0X08)                       //设置偏移——起点
+    {
+        ScreenCmd.OffsetPaper1=((data_buffer[3])<<8) | data_buffer[2];
+    }
+    else if(*(data_buffer+1)==0X09)                       //设置偏移——终点
+    {
+        ScreenCmd.OffsetPaper2=((data_buffer[3])<<8) | data_buffer[2];
+    }
+    else if(*(data_buffer+1)==0X0A)                       //设置偏移
+    {
+        ScreenCmd.Offset=1;
+        DataTemp_u16=((data_buffer[3])<<8) | data_buffer[2];
+        DataTemp_s16=(int16_t)DataTemp_u16;
+        ScreenCmd.OffsetData=(float)DataTemp_s16/100;
+    }
+    else if(*(data_buffer+1)==0X0B)                       //删除偏移——起点
+    {
+        ScreenCmd.DeleteOffsetPaper1=((data_buffer[3])<<8) | data_buffer[2];
+    }
+    else if(*(data_buffer+1)==0X0C)                       //删除偏移——终点
+    {
+        ScreenCmd.DeleteOffset=1;
+        ScreenCmd.DeleteOffsetPaper2=((data_buffer[3])<<8) | data_buffer[2];
     }
 //    SendScreenPaperNum(ScreenCmd.Stop);
 }
