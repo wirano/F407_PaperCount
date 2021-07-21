@@ -15,9 +15,22 @@ typedef struct
     uint16_t CorrectNum;      //校准的纸张数
     uint8_t Finish;           //完成测量命令
     uint8_t Stop;             //中止测量命令
+
+    uint8_t ScreenPage;       //屏幕当前界面
+
     uint8_t Correct;          //校准指令
     uint8_t Correct_apply;    //校准完成计算数据
-    uint8_t ScreenPage;       //屏幕当前界面
+    uint8_t DeleteCorrect;    //删除校准指令
+    uint16_t DeleteCorrectData;//删除校准数据
+
+    uint8_t Offset;           //设置偏移命令
+    uint16_t OffsetPaper1;    //偏移——起点
+    uint16_t OffsetPaper2;    //偏移——终点
+    float OffsetData;         //偏移量
+
+    uint8_t DeleteOffset;     //删除偏移指令
+    uint16_t DeleteOffsetPaper1;//删除偏移——起点
+    uint16_t DeleteOffsetPaper2;//删除偏移——终点
 }ScreenCmdSt;
 
 typedef enum
