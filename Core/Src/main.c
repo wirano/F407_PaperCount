@@ -246,6 +246,12 @@ int main(void)
             ScreenCmd.Correct_apply = 0;
         }
 
+        if (ScreenCmd.DeleteCorrect) {
+            ScreenCmd.DeleteCorrect = 0;
+            freq_cali[ScreenCmd.DeleteCorrectData] = 0;
+            ef_set_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali));
+        }
+
         if (cnt_raw < 100) {
             SendScreenPlateState(ShortCircuit);
         } else {
