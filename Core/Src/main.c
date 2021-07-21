@@ -196,10 +196,13 @@ int main(void)
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         HAL_Delay(500);
 
-        SendScreenPaperNum(paper_cnt);
+        if (ScreenCmd.PaperNum == 0) {
+            SendScreenPaperNum(paper_cnt);
+        }
+
         if (info) {
-            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%lld cnt_int:%ld\r\n",
-                    cnt_raw, multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2], cnt_sum,
+            logInfo("cnt_raw:%ld s1:%.2lf s2:%.2lf s3:%.2lf cnt_sum:%ld freq_calied:%.3lf cnt_int:%ld\r\n",
+                    cnt_raw, multi_paper_fit[0], multi_paper_fit[1], multi_paper_fit[2], cnt_sum, freq_calied,
                     int_cnt);
 
 //            retSD = f_open(&file, filename, FA_OPEN_APPEND | FA_WRITE | FA_READ);
@@ -252,7 +255,7 @@ int main(void)
             ef_set_env_blob("freq_cali_table", freq_cali, sizeof(freq_cali));
         }
 
-        if (cnt_raw < 100) {
+        if (cnt_raw < 100 && HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_0) == GPIO_PIN_SET && ScreenCmd.PaperNum == 0) {
             SendScreenPlateState(ShortCircuit);
         } else {
             SendScreenPlateState(NoShortCircuit);

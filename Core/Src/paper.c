@@ -13,7 +13,7 @@ uint16_t paper_cnt;
 
 uint32_t freq_raw;
 uint32_t cnt_raw;
-uint64_t cnt_sum;
+uint32_t cnt_sum;
 uint32_t int_cnt;
 uint8_t sample_cnt;
 double multi_paper_fit[3];
@@ -21,7 +21,7 @@ uint8_t rsted = 0;
 
 uint8_t info = 0;
 
-uint32_t freq_cali[100];
+uint32_t freq_cali[500];
 cali_line_st cali_1_65[65];
 cali_line_st cali_55_90[36];
 cali_data_st cali_data = {cali_1_65, cali_55_90, 0, 0};
@@ -30,17 +30,23 @@ double cali_delta_next;
 double cali_freq_delta; // cali_freq_delta = cali_k * freq_raw + cali_b
 double freq_calied; // = freq_raw + cali_freq_delta
 
+//linear 90-115
+linear_fit_st linear[50];
+linear_data_st linear_data = {linear, 0};
+double linear_k;
+double linear_b;
+
 
 void paper_cali(void)
 {
-    uint8_t paper_freq_map_prev;
+    uint16_t paper_freq_map_prev;
 
     cali_data.cnt_1_65 = 0;
     paper_freq_map_prev = 0;
     for (int i = 1; i <= 65; ++i) {
         if (freq_cali[i] != 0) {
             if (paper_freq_map_prev != 0) {
-                if (paper_freq_map_prev < 55) {
+                if (paper_freq_map_prev <= 55) {
                     cali_delta_prev = (double) freq_orig_1_65[paper_freq_map_prev - 1] -
                                       (double) freq_cali[paper_freq_map_prev];
 
@@ -75,38 +81,61 @@ void paper_cali(void)
 
     cali_data.cnt_55_90 = 0;
     paper_freq_map_prev = 55;
-    for (int i = 55; i <= 90; ++i) {
+    for (int i = 56; i <= 90; ++i) {
         if (freq_cali[i] != 0) {
-            if (paper_freq_map_prev != 0) {
-                if (paper_freq_map_prev < 55) {
-                    cali_delta_prev = (double) freq_orig_55_90[paper_freq_map_prev - 55] -
-                                      (double) freq_cali[paper_freq_map_prev];
+//            if (paper_freq_map_prev != 0) {
+            if (paper_freq_map_prev <= 90) {
+                cali_delta_prev = (double) freq_orig_55_90[paper_freq_map_prev - 55] -
+                                  (double) freq_cali[paper_freq_map_prev];
 
-                    cali_delta_next = (double) freq_orig_55_90[i - 55] - (double) freq_cali[i];
+                cali_delta_next = (double) freq_orig_55_90[i - 55] - (double) freq_cali[i];
 
-                    cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k =
-                            (cali_delta_next - cali_delta_prev) /
-                            (double) (freq_cali[i - 55] - freq_cali[paper_freq_map_prev]);
+                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k =
+                        (cali_delta_next - cali_delta_prev) /
+                        (double) (freq_cali[i] - freq_cali[paper_freq_map_prev]);
 
-                    cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_b = cali_delta_next -
-                                                                            cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k *
-                                                                            (double) freq_cali[i];
+                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_b = cali_delta_next -
+                                                                        cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k *
+                                                                        (double) freq_cali[i];
 
-                    cali_data.line_cali_55_90[cali_data.cnt_55_90].freq_divide = freq_cali[i];
+                cali_data.line_cali_55_90[cali_data.cnt_55_90].freq_divide = freq_cali[i];
 
-                    paper_freq_map_prev = i;
-                    cali_data.cnt_55_90++;
-
-                    logDebug("55-90 cali_k:%f cali_b:%f",
-                             cali_data.line_cali_55_90[cali_data.cnt_55_90 - 55].cali_k,
-                             cali_data.line_cali_55_90[cali_data.cnt_55_90 - 55].cali_b);
-                }
-            } else {
-                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k = 0;
-                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_b = 0;
-                cali_data.line_cali_55_90[cali_data.cnt_55_90].freq_divide = freq_cali[i - 55];
                 paper_freq_map_prev = i;
                 cali_data.cnt_55_90++;
+
+                logDebug("55-90 cali_k:%f cali_b:%f",
+                         cali_data.line_cali_55_90[cali_data.cnt_55_90 - 1].cali_k,
+                         cali_data.line_cali_55_90[cali_data.cnt_55_90 - 1].cali_b);
+            }
+//            } else {
+//                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_k = 0;
+//                cali_data.line_cali_55_90[cali_data.cnt_55_90].cali_b = 0;
+//                cali_data.line_cali_55_90[cali_data.cnt_55_90].freq_divide = freq_cali[i];
+//                paper_freq_map_prev = i;
+//                cali_data.cnt_55_90++;
+//            }
+        }
+    }
+
+    linear_data.cnt_linear = 0;
+    paper_freq_map_prev = 90;
+    for (int i = 91; i < 500; ++i) {
+        if (freq_cali[i] != 0) {
+            if (paper_freq_map_prev >= 90) {
+
+                linear_data.linear[linear_data.cnt_linear].linear_k =
+                        (double) (i - paper_freq_map_prev) / (double) (freq_cali[i] - freq_cali[paper_freq_map_prev]);
+
+                linear_data.linear[linear_data.cnt_linear].linear_b =
+                        i - linear_data.linear[linear_data.cnt_linear].linear_k * freq_cali[i];
+
+                linear_data.linear[linear_data.cnt_linear].freq_divide = freq_cali[i];
+
+                paper_freq_map_prev = i;
+                linear_data.cnt_linear++;
+
+                logDebug("90-115 linear_k:%f linear_b:%f", linear_data.linear[linear_data.cnt_linear - 1].linear_k,
+                         linear_data.linear[linear_data.cnt_linear - 1].linear_b);
             }
         }
     }
@@ -121,6 +150,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     uint32_t ex_tmp;
 
     cali_line_st cali_used;
+    linear_fit_st linear_used;
     static uint32_t freq_cali_sum = 0;
 
     cnt_raw = TIM2->CNT;
@@ -207,7 +237,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //                    a7 * exp(-pow(((cnt_sum - b7) / c7), 2)) + a8 * exp(-pow(((cnt_sum - b8) / c8), 2));
 //        paper_fit = a0 + a1 * cos(cnt_sum * w) + b1 * sin(cnt_sum * w) + a2 * cos(cnt_sum * w) + b2 * sin(cnt_sum * w) +
 //                    a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w) + a3 * cos(cnt_sum * w) + b3 * sin(cnt_sum * w);
-        } else {
+        } else if (cnt_sum < (freq_cali[90] == 0 ? freq_orig_55_90[90 - 55] :
+                              freq_cali[90])) {
             //61-90
 
             for (int i = 0; i < cali_data.cnt_55_90; ++i) {
@@ -225,10 +256,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                     sa1 * exp(-pow(((freq_calied - sb1) / sc1), 2)) + sa2 * exp(-pow(((freq_calied - sb2) / sc2), 2)) +
                     sa3 * exp(-pow(((freq_calied - sb3) / sc3), 2)) + sa4 * exp(-pow(((freq_calied - sb4) / sc4), 2)) +
                     sa5 * exp(-pow(((freq_calied - sb5) / sc5), 2));
+        } else {
+            // >= 90 线性分段处理
+            for (int i = 0; i < linear_data.cnt_linear; ++i) {
+                if ((double) cnt_sum < linear_data.linear[i].freq_divide) {
+                    linear_used = linear_data.linear[i];
+                    break;
+                }
+            }
+
+            paper_fit = (double) cnt_sum * linear_used.linear_k + linear_used.linear_b;
         }
         if (rsted) {
             multi_paper_fit[sample_cnt++] = paper_fit;
-            if (sample_cnt <= 3) {
+            if (sample_cnt - 1 < 3) {
                 freq_cali_sum += (uint32_t) cnt_sum;
             }
         }

@@ -208,11 +208,10 @@ void SendScreenPlateState(PlateStateEm state)
 
     if(state==ShortCircuit)
     {
-        sprintf(StrCommand,"t3.txt=\"是\"");               //拼接 字符串命令主干+值
+        sprintf(StrCommand, "t3.txt=\"Y\"");               //拼接 字符串命令主干+值
     }
-    else if(state==NoShortCircuit)
-    {
-        sprintf(StrCommand,"t3.txt=\"否\"");               //拼接 字符串命令主干+值
+    else if(state==NoShortCircuit) {
+        sprintf(StrCommand, "t3.txt=\"N\"");               //拼接 字符串命令主干+值
     }
 
     StrLen=strlen(StrCommand);                                  //计算字符串命令的长度
